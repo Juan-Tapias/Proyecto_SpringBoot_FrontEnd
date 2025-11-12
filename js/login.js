@@ -57,3 +57,5 @@ window.login = async function () {
     document.getElementById('login-status').innerText = "Error: " + error.message;
   }
 };
+
+// Este es el login
