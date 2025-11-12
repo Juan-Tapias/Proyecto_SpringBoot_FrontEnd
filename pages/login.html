@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión</title>
+  <link rel="stylesheet" href="/css/login.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+</head>
+<body>
+  <section id="ventana-login"></section>
+
+  <div class="auth-container">
+    <div class="auth-card" id="auth-card">
+
+      <!-- LOGIN -->
+      <section class="auth-form active" id="login">
+        <h2>⊹⊱Iniciar sesión⊰⊹</h2>
+        <div class="input-container">
+          <input type="text" id="login-username" required>
+          <label for="login-username" class="label">Usuario</label>
+          <div class="underline"></div>
+        </div>
+        <div class="input-container">
+          <input type="password" id="login-password" required>
+          <label for="login-password" class="label">Contraseña</label>
+          <div class="underline"></div>
+        </div>
+        <button onclick="login()">Iniciar sesión</button>
+        <p class="auth-status" id="login-status"></p>
+      </section>
+
+    </div>
+  </div>
+
+  <script type="module" src="/js/login.js"></script>
+</body>
+</html>
