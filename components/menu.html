@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="menu.css">
+    <title>Sistema de Gestión de Bodegas - LogiTrack S.A.</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Menú lateral -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>LogiTrack S.A.</h1>
+                <p>Sistema de Gestión de Bodegas</p>
+            </div>
+            <ul class="menu">
+                <li class="menu-item active" data-target="dashboard">
+                    <i>📊</i> Dashboard
+                </li>
+                <li class="menu-item" data-target="bodegas">
+                    <i>🏭</i> Gestión de Bodegas
+                </li>
+                <li class="menu-item" data-target="productos">
+                    <i>📦</i> Gestión de Productos
+                </li>
+                <li class="menu-item" data-target="movimientos">
+                    <i>🔄</i> Movimientos de Inventario
+                </li>
+                <li class="menu-item" data-target="auditoria">
+                    <i>📋</i> Auditoría de Cambios
+                </li>
+                <li class="menu-item" data-target="reportes">
+                    <i>📈</i> Reportes
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <div class="header">
+                <h2 id="page-title">Dashboard</h2>
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Usuario+Sistema&background=3498db&color=fff" alt="Usuario">
+                    <div>
+                        <div>Usuario Sistema</div>
+                        <div style="font-size: 0.8rem; color: #7f8c8d;">Administrador</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard -->
+            <div id="dashboard" class="content-area">
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h3>Total Bodegas</h3>
+                        <div class="value">8</div>
+                    </div>
+                    <div class="card">
+                        <h3>Total Productos</h3>
+                        <div class="value">156</div>
+                    </div>
+                    <div class="card">
+                        <h3>Movimientos Hoy</h3>
+                        <div class="value">24</div>
+                    </div>
+                    <div class="card">
+                        <h3>Capacidad Utilizada</h3>
+                        <div class="value">78%</div>
+                    </div>
+                </div>
+                
+                <div class="recent-activity">
+                    <h3>Actividad Reciente</h3>
+                    <ul class="activity-list">
+                        <li class="activity-item">
+                            <div class="activity-icon">📦</div>
+                            <div class="activity-details">
+                                <div class="activity-title">Entrada de productos en Bodega Central</div>
+                                <div class="activity-time">Hace 15 minutos</div>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon">🔄</div>
+                            <div class="activity-details">
+                                <div class="activity-title">Transferencia a Bodega Norte completada</div>
+                                <div class="activity-time">Hace 2 horas</div>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon">➕</div>
+                            <div class="activity-details">
+                                <div class="activity-title">Nuevo producto agregado al catálogo</div>
+                                <div class="activity-time">Hace 4 horas</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Gestión de Bodegas -->
+            <div id="bodegas" class="content-area hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Gestión de Bodegas</h3>
+                    <button class="btn btn-primary" id="btn-nueva-bodega">Nueva Bodega</button>
+                </div>
+                
+                <!-- Formulario para nueva bodega (inicialmente oculto) -->
+                <div id="form-bodega" class="hidden">
+                    <h4>Registrar Nueva Bodega</h4>
+                    <div class="form-group">
+                        <label for="nombre-bodega">Nombre</label>
+                        <input type="text" id="nombre-bodega" class="form-control" placeholder="Nombre de la bodega">
+                    </div>
+                    <div class="form-group">
+                        <label for="ubicacion-bodega">Ubicación</label>
+                        <input type="text" id="ubicacion-bodega" class="form-control" placeholder="Ubicación de la bodega">
+                    </div>
+                    <div class="form-group">
+                        <label for="capacidad-bodega">Capacidad</label>
+                        <input type="number" id="capacidad-bodega" class="form-control" placeholder="Capacidad en unidades">
+                    </div>
+                    <div class="form-group">
+                        <label for="encargado-bodega">Encargado</label>
+                        <input type="text" id="encargado-bodega" class="form-control" placeholder="Nombre del encargado">
+                    </div>
+                    <div>
+                        <button class="btn btn-primary">Guardar</button>
+                        <button class="btn" style="background-color: #95a5a6; color: white; margin-left: 10px;" id="btn-cancelar-bodega">Cancelar</button>
+                    </div>
+                </div>
+                
+                <!-- Tabla de bodegas -->
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Ubicación</th>
+                            <th>Capacidad</th>
+                            <th>Encargado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>B001</td>
+                            <td>Bodega Central</td>
+                            <td>Ciudad Principal</td>
+                            <td>5000</td>
+                            <td>Juan Pérez</td>
+                            <td class="action-buttons">
+                                <button class="btn btn-sm btn-edit">Editar</button>
+                                <button class="btn btn-sm btn-delete">Eliminar</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>B002</td>
+                            <td>Bodega Norte</td>
+                            <td>Zona Industrial Norte</td>
+                            <td>3000</td>
+                            <td>María González</td>
+                            <td class="action-buttons">
+                                <button class="btn btn-sm btn-edit">Editar</button>
+                                <button class="btn btn-sm btn-delete">Eliminar</button>
+                            </td>
+                        </tr>
+                        <!-- Más filas de ejemplo -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Gestión de Productos -->
+            <div id="productos" class="content-area hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Gestión de Productos</h3>
+                    <button class="btn btn-primary" id="btn-nuevo-producto">Nuevo Producto</button>
+                </div>
+                
+                <!-- Formulario para nuevo producto (inicialmente oculto) -->
+                <div id="form-producto" class="hidden">
+                    <h4>Registrar Nuevo Producto</h4>
+                    <div class="form-group">
+                        <label for="nombre-producto">Nombre</label>
+                        <input type="text" id="nombre-producto" class="form-control" placeholder="Nombre del producto">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria-producto">Categoría</label>
+                        <input type="text" id="categoria-producto" class="form-control" placeholder="Categoría del producto">
+                    </div>
+                    <div class="form-group">
+                        <label for="stock-producto">Stock Inicial</label>
+                        <input type="number" id="stock-producto" class="form-control" placeholder="Cantidad inicial en stock">
+                    </div>
+                    <div class="form-group">
+                        <label for="precio-producto">Precio</label>
+                        <input type="number" id="precio-producto" class="form-control" placeholder="Precio unitario">
+                    </div>
+                    <div>
+                        <button class="btn btn-primary">Guardar</button>
+                        <button class="btn" style="background-color: #95a5a6; color: white; margin-left: 10px;" id="btn-cancelar-producto">Cancelar</button>
+                    </div>
+                </div>
+                
+                <!-- Tabla de productos -->
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Stock</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>P001</td>
+                            <td>Laptop Dell XPS 13</td>
+                            <td>Tecnología</td>
+                            <td>25</td>
+                            <td>$1,200.00</td>
+                            <td class="action-buttons">
+                                <button class="btn btn-sm btn-edit">Editar</button>
+                                <button class="btn btn-sm btn-delete">Eliminar</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>P002</td>
+                            <td>Monitor Samsung 24"</td>
+                            <td>Tecnología</td>
+                            <td>42</td>
+                            <td>$180.00</td>
+                            <td class="action-buttons">
+                                <button class="btn btn-sm btn-edit">Editar</button>
+                                <button class="btn btn-sm btn-delete">Eliminar</button>
+                            </td>
+                        </tr>
+                        <!-- Más filas de ejemplo -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Movimientos de Inventario -->
+            <div id="movimientos" class="content-area hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Movimientos de Inventario</h3>
+                    <div>
+                        <button class="btn btn-primary" id="btn-nuevo-movimiento">Nuevo Movimiento</button>
+                    </div>
+                </div>
+                
+                <!-- Formulario para nuevo movimiento (inicialmente oculto) -->
+                <div id="form-movimiento" class="hidden">
+                    <h4>Registrar Nuevo Movimiento</h4>
+                    <div class="form-group">
+                        <label for="tipo-movimiento">Tipo de Movimiento</label>
+                        <select id="tipo-movimiento" class="form-control">
+                            <option value="">Seleccione un tipo</option>
+                            <option value="ENTRADA">Entrada</option>
+                            <option value="SALIDA">Salida</option>
+                            <option value="TRANSFERENCIA">Transferencia</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bodega-origen">Bodega Origen</label>
+                        <select id="bodega-origen" class="form-control">
+                            <option value="">Seleccione bodega origen</option>
+                            <option value="B001">Bodega Central</option>
+                            <option value="B002">Bodega Norte</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bodega-destino">Bodega Destino</label>
+                        <select id="bodega-destino" class="form-control">
+                            <option value="">Seleccione bodega destino</option>
+                            <option value="B001">Bodega Central</option>
+                            <option value="B002">Bodega Norte</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto-movimiento">Producto</label>
+                        <select id="producto-movimiento" class="form-control">
+                            <option value="">Seleccione producto</option>
+                            <option value="P001">Laptop Dell XPS 13</option>
+                            <option value="P002">Monitor Samsung 24"</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cantidad-movimiento">Cantidad</label>
+                        <input type="number" id="cantidad-movimiento" class="form-control" placeholder="Cantidad">
+                    </div>
+                    <div>
+                        <button class="btn btn-primary">Registrar</button>
+                        <button class="btn" style="background-color: #95a5a6; color: white; margin-left: 10px;" id="btn-cancelar-movimiento">Cancelar</button>
+                    </div>
+                </div>
+                
+                <!-- Tabla de movimientos -->
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Bodega Origen</th>
+                            <th>Bodega Destino</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>M001</td>
+                            <td>15/05/2023</td>
+                            <td>ENTRADA</td>
+                            <td>Laptop Dell XPS 13</td>
+                            <td>10</td>
+                            <td>-</td>
+                            <td>Bodega Central</td>
+                            <td>Usuario Sistema</td>
+                        </tr>
+                        <tr>
+                            <td>M002</td>
+                            <td>16/05/2023</td>
+                            <td>TRANSFERENCIA</td>
+                            <td>Monitor Samsung 24"</td>
+                            <td>5</td>
+                            <td>Bodega Central</td>
+                            <td>Bodega Norte</td>
+                            <td>Usuario Sistema</td>
+                        </tr>
+                        <!-- Más filas de ejemplo -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Auditoría de Cambios -->
+            <div id="auditoria" class="content-area hidden">
+                <h3>Auditoría de Cambios</h3>
+                <p>Registro de todas las operaciones realizadas en el sistema.</p>
+                
+                <!-- Tabla de auditoría -->
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha/Hora</th>
+                            <th>Operación</th>
+                            <th>Usuario</th>
+                            <th>Entidad</th>
+                            <th>Valor Anterior</th>
+                            <th>Valor Nuevo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>A001</td>
+                            <td>15/05/2023 10:30:25</td>
+                            <td>INSERT</td>
+                            <td>Usuario Sistema</td>
+                            <td>Producto</td>
+                            <td>-</td>
+                            <td>Laptop Dell XPS 13</td>
+                        </tr>
+                        <tr>
+                            <td>A002</td>
+                            <td>15/05/2023 11:15:42</td>
+                            <td>UPDATE</td>
+                            <td>Usuario Sistema</td>
+                            <td>Bodega</td>
+                            <td>Capacidad: 4000</td>
+                            <td>Capacidad: 5000</td>
+                        </tr>
+                        <!-- Más filas de ejemplo -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Reportes -->
+            <div id="reportes" class="content-area hidden">
+                <h3>Reportes</h3>
+                <p>Generación de reportes del sistema.</p>
+                
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <h3>Reporte de Inventario</h3>
+                        <p>Estado actual del inventario por bodega</p>
+                        <button class="btn btn-primary" style="margin-top: 15px;">Generar</button>
+                    </div>
+                    <div class="card">
+                        <h3>Reporte de Movimientos</h3>
+                        <p>Movimientos por período de tiempo</p>
+                        <button class="btn btn-primary" style="margin-top: 15px;">Generar</button>
+                    </div>
+                    <div class="card">
+                        <h3>Reporte de Auditoría</h3>
+                        <p>Actividad del sistema por usuario</p>
+                        <button class="btn btn-primary" style="margin-top: 15px;">Generar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="menu.js"></script>
+</body>
+</html>
