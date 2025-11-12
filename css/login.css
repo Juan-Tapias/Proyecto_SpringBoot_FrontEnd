@@ -1,0 +1,224 @@
+:root {
+  --bg-gradient: linear-gradient(120deg, #212529 0%, #384150 100%);
+  --card-bg: #232e3c;
+  --card-shadow: 0 8px 32px 0 rgba(34, 50, 84, 0.26);
+  --primary-color: #2c92d2;       
+  --primary-hover: #2474ad;        
+  --secondary-color: #7b99b3;
+  --accent-color: #f39c4f;       
+  --error-color: #f55454;          
+  --success-color: #4DD197;       
+  --text-color: #e6eaf3;           
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  color: var(--text-color);
+}
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.auth-card {
+  width: 350px;
+  max-width: 90vw;
+  border-radius: 16px;
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  border: none;
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: box-shadow 0.3s ease;
+}
+
+.auth-card:hover {
+  box-shadow: 0 16px 50px 0 rgba(70, 129, 137, 0.25);
+}
+
+.auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h2, .login-title {
+  margin-top: 0;
+  font-size: 1.8rem;
+  color: var(--text-color);
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 8px rgba(70, 129, 137, 0.12);
+}
+
+.toggle-auth {
+  margin-top: 2rem;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.toggle-auth span {
+  color: var(--primary-color);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.toggle-auth span:hover {
+  color: #3b6f75;
+}
+
+@media (max-width: 768px){
+  .auth-card {
+    width: 90vw;
+    padding: 2rem 1rem 1.5rem 1rem;
+  }
+}
+
+.input-container {
+  position: relative;
+  margin: 50px auto;
+  width: 200px;
+  color: white;
+}
+
+.input-container input[type="text"],
+.input-container input[type="email"],
+.input-container input[type="password"] {
+  font-size: 12px;
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  padding: 5px 0;
+  background-color: transparent;
+  outline: none;
+  color: white;
+}
+
+.input-container .label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ccc;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.input-container input[type="text"]:focus ~ .label,
+.input-container input[type="text"]:valid ~ .label,
+.input-container input[type="email"]:focus ~ .label,
+.input-container input[type="email"]:valid ~ .label,
+.input-container input[type="password"]:focus ~ .label,
+.input-container input[type="password"]:valid ~ .label {
+  top: -20px;
+  font-size: 16px;
+  color: white;
+}
+
+.input-container .underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background-color: #333;
+  transform: scaleX(0);
+  transition: all 0.3s ease;
+}
+
+.input-container input[type="text"]:focus ~ .underline,
+.input-container input[type="text"]:valid ~ .underline,
+.input-container input[type="email"]:focus ~ .underline,
+.input-container input[type="email"]:valid ~ .underline,
+.input-container input[type="password"]:focus ~ .underline,
+.input-container input[type="password"]:valid ~ .underline {
+  transform: scaleX(1);
+}
+
+button {
+  position: relative;
+  border-radius: 7px;
+  padding: 10px;
+  border: 1px solid white;
+  font-size: 14px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 2px;
+  background: transparent;
+  min-width: 10vw;
+  max-width: 50vw;
+  color: #fff;
+  box-shadow: 0 0 0 0 transparent;
+  -webkit-transition: all 0.2s ease-in;
+  -moz-transition: all 0.2s ease-in;
+  transition: all 0.2s ease-in;
+}
+
+button:hover {
+  background: #031926;
+  box-shadow: 0 0 30px 5px #556269;
+  -webkit-transition: all 0.2s ease-out;
+  -moz-transition: all 0.2s ease-out;
+  transition: all 0.2s ease-out;
+}
+
+button:hover::before {
+  -webkit-animation: sh02 0.5s 0s linear;
+  -moz-animation: sh02 0.5s 0s linear;
+  animation: sh02 0.5s 0s linear;
+}
+
+button::before {
+  content: '';
+  display: block;
+  width: 0px;
+  position: absolute;
+  top: 7%;
+  left: 0%;
+  opacity: 0;
+  background: #fff;
+  box-shadow: 0 0 50px 30px #fff;
+  -webkit-transform: skewX(-20deg);
+  -moz-transform: skewX(-20deg);
+  -ms-transform: skewX(-20deg);
+  -o-transform: skewX(-20deg);
+  transform: skewX(-20deg);
+}
+
+@keyframes sh02 {
+  from {
+    opacity: 0;
+    left: 0%;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    left: 100%;
+  }
+}
+
+button:active {
+  box-shadow: 0 0 0 0 transparent;
+  -webkit-transition: box-shadow 0.2s ease-in;
+  -moz-transition: box-shadow 0.2s ease-in;
+  transition: box-shadow 0.2s ease-in;
+}
