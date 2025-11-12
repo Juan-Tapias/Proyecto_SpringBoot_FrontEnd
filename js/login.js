@@ -1,13 +1,3 @@
-// ==================== ENCRIPTAR CONTRASEÑA ====================
-async function encriptarContraseña(contraseña) {
-  const encoder = new TextEncoder();
-  const datos = encoder.encode(contraseña);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', datos);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
-}
-
 // ==================== LOGIN ADMIN ====================
 window.login = async function () {
   const username = document.getElementById('login-username').value;
@@ -19,18 +9,16 @@ window.login = async function () {
   }
 
   try {
-    const hashedPassword = await encriptarContraseña(password);
-
     const response = await fetch('http://localhost:8080/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password: hashedPassword })
+      body: JSON.stringify({ username, password })
     });
 
     if (response.ok) {
       const user = await response.json();
 
-      if(user.rol !== "ADMIN"){
+      if (user.rol !== "ADMIN") {
         document.getElementById('login-status').innerText = "Acceso denegado. Solo administradores.";
         return;
       }
@@ -57,5 +45,3 @@ window.login = async function () {
     document.getElementById('login-status').innerText = "Error: " + error.message;
   }
 };
-
-// Este es el login
