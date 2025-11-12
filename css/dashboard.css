@@ -1,0 +1,48 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+.sidebar-container {
+  width: 250px;
+  background-color: #062d3a;
+  color: #fff;
+  overflow-y: auto; 
+  flex-shrink: 0;  
+  padding: 1rem;
+  position: fixed; 
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 0px;
+  padding: 2rem;
+  overflow-y: auto;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
+
+.informacion>div{
+    width: 350px;
+    height: 150px;
+    border-left: 5px solid #195366;
+    border-radius: 20px;
+    padding: 10px;
+}
+
+.informacion>div:hover{
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.informacion{
+    display: flex;
+    flex-wrap: nowrap;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    gap: 30px;
+    padding: 10px;
+}

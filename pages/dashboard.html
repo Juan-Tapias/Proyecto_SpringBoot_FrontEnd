@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/menu.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <title>Dashboard</title>
+</head>
+<body>
+  <div class="app-container">
+    <div class="targetSelector"></div>
+
+    <main class="main-content">
+      <h1>Dashboard</h1>
+      <hr>
+      <section class="informacion">
+        <div class="bodegas">
+          <p>Total Bodegas</p>
+          <p id="total-bodegas"></p>
+        </div>
+        <div>
+          <p>Total Productos</p>
+          <p id="total-productos"></p>
+        </div>
+        <div>
+          <p>Movimientos Hoy</p>
+          <p id="movimientos-hoy"></p>
+        </div>
+      </section>
+      <section class="movimientos">
+        <div id="movimientos"></div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { renderSidebarMenu } from '/components/menu.js';
+    renderSidebarMenu('.sidebar-container');
+  </script>
+  <script type="module" src="/js/dashboard.js"></script>
+</body>
+</html>

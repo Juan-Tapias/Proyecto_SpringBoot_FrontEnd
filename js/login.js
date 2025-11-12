@@ -22,7 +22,7 @@ window.login = async function () {
         document.getElementById('login-status').innerText = "Acceso denegado. Solo administradores.";
         return;
       }
-
+  
       document.getElementById('login-status').innerText = "Inicio de sesión exitoso.";
       sessionStorage.setItem("userData", JSON.stringify(user));
       window.location.href = "/dashboard/dashboard.html";
