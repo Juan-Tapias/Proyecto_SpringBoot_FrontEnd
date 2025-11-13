@@ -1,25 +1,86 @@
 body {
     font-family: "Poppins", sans-serif;
+    overflow: hidden;
 }
 
 .app-container {
   display: flex;
-  height: 100vh;
-  overflow: hidden;
+  height: 100vh; /* toda la pantalla */
 }
 
+.sidebar {
+  width: 230px;
+  background-color: #2c3e50;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  height: 100%; /* importante para usar scroll interno */
+}
 
 .container {
-  max-width: 1100px;
-  margin: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* ocupa todo el espacio disponible */
 }
 
+.bodegas-container {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  overflow-y: auto; /* scroll vertical solo si hay overflow */
+  padding-right: 5px;
+
+  /* Opcional: estilo moderno de scrollbar */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #007bff transparent; /* Firefox */
+}
+
+/* Chrome, Edge y Safari */
+.bodegas-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bodegas-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bodegas-container::-webkit-scrollbar-thumb {
+  background-color: #007bff;
+  border-radius: 3px;
+}
+
+/* Header */
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column; /* 👈 apila el título y los controles */
+  align-items: flex-start; /* usa 'center' si quieres el título centrado */
+  text-align: left;
   margin-bottom: 20px;
 }
+
+.header h2 {
+  margin: 0 0 10px 0; /* separa el título del buscador */
+  color: #0056d6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start; /* 👈 para que buscador y botón queden alineados bajo el título */
+}
+
+/* Contenedor de tarjetas */
+
+
 
 .header h2 {
   color: #0056d6;
@@ -27,12 +88,6 @@ body {
   align-items: center;
   gap: 5px;
 }
-
-.controls {
-  display: flex;
-  gap: 10px;
-}
-
 .controls input {
   padding: 8px 12px;
   border-radius: 6px;
@@ -53,13 +108,6 @@ body {
 
 #addBodegaBtn:hover {
   background-color: #0056b3;
-}
-
-/* Tarjetas */
-.bodegas-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
 }
 
 .bodega-card {
@@ -126,5 +174,63 @@ body {
 
 .delete-btn {
   background-color: #dc3545;
+}
+
+.modal {
+  display: none; /* oculto por defecto */
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  width: 350px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: slideDown 0.3s ease-out;
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-actions button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+#modal-ok {
+  background-color: #007bff;
+  color: white;
+}
+
+#modal-ok:hover {
+  background-color: #0056b3;
+}
+
+#modal-cancel {
+  background-color: #dc3545;
+  color: white;
+}
+
+#modal-cancel:hover {
+  background-color: #b52a37;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
