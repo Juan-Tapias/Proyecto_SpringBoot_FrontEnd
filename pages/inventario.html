@@ -1,36 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/inventario.css">
-    <link rel="stylesheet" href="/css/menu.css">
-    <title>Inventario</title>
-</head>
-<body>
-    <div class="app-container">
-        <div class="targetSelector"></div>
-        <main class="main-content">
-            <h1>Inventario</h1>
-            <hr>
-            <section class="productos">
-                <div id="producto-data"></div>
-            </section>
-            <div id="modal-editar" class="modal hidden">
-            <div class="modal-content">
-                <h2>Editar Producto</h2>
-                <form id="form-editar">
-                <input type="text" id="editar-nombre" placeholder="Nombre">
-                <input type="text" id="editar-categoria" placeholder="Categoría">
-                <input type="number" id="editar-precio" placeholder="Precio">
-                <input type="number" id="editar-stock" placeholder="Stock">
-                <button type="submit">Guardar</button>
-                <button type="button" id="cerrar-modal">Cancelar</button>
-                </form>
-            </div>
-            </div>
-        </main>
+<h1>Inventario</h1>
+<hr>
+<section class="productos">
+    <div id="producto-data"></div>
+</section>
+<div id="modal-editar" class="modal hidden">
+    <div class="modal-content">
+        <h2>Editar Producto</h2>
+        <form id="form-editar">
+            <input type="text" id="editar-nombre" placeholder="Nombre">
+            <input type="text" id="editar-categoria" placeholder="Categoría">
+            <input type="number" id="editar-precio" placeholder="Precio">
+            <input type="number" id="editar-stock" placeholder="Stock">
+            <button type="submit">Guardar</button>
+            <button type="button" id="cerrar-modal">Cancelar</button>
+        </form>
     </div>
-</body>
-<script type="module" src="/js/inventario.js"></script>
-</html>
+</div>

@@ -4,7 +4,7 @@
   if (userData) {
     const user = JSON.parse(userData);
     if (user.rol === "ADMIN") {
-      window.location.href = "dashboard.html";
+      window.location.href = "/index.html";
     }
   }
 })();
@@ -37,7 +37,7 @@ window.login = async function () {
       document.getElementById('login-status').innerText = "Inicio de sesión exitoso.";
 
   
-      window.location.href = "dashboard.html";
+      window.location.href = "/index.html";
 
     } else {
       let errorMessage = "Usuario o contraseña incorrectos";

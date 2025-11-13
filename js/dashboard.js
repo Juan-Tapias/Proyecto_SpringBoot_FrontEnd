@@ -1,6 +1,3 @@
-import { renderSidebarMenu } from '../components/menu.js';
-renderSidebarMenu('.targetSelector');
-
 const userData = JSON.parse(sessionStorage.getItem("userData"));
 const isAdmin = userData?.rol === "ADMIN";
 
@@ -18,26 +15,44 @@ function getRangoUrl(inicioISO, finISO) {
     : `http://localhost:8080/api/empleado/movimientos/rango?usuarioId=${userData.id}&inicio=${encodeURIComponent(inicioISO)}&fin=${encodeURIComponent(finISO)}`;
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await cargarResumen();
-  await cargarMovimientos();
-
+export function initDashboard() {
+  console.log('🔄 Inicializando dashboard...');
+  
   const btnFiltrar = document.getElementById("btn-filtrar");
-  if (btnFiltrar) btnFiltrar.addEventListener("click", filtrarPorFechas);
-});
+  if (btnFiltrar) {
+    btnFiltrar.replaceWith(btnFiltrar.cloneNode(true));
+  }
+
+  const newBtnFiltrar = document.getElementById("btn-filtrar");
+  if (newBtnFiltrar) {
+    newBtnFiltrar.addEventListener("click", filtrarPorFechas);
+  }
+
+  cargarResumen();
+  cargarMovimientos();
+}
 
 async function cargarResumen() {
   try {
+    console.log('📊 Cargando resumen...');
     const response = await fetch(resumenUrl, {
       headers: {
         "Authorization": `Bearer ${userData?.token}`
       }
     });
+    
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
     const data = await response.json();
 
-    document.getElementById("total-bodegas").textContent = data.totalBodegas;
-    document.getElementById("total-productos").textContent = data.totalProductos;
-    document.getElementById("movimientos-hoy").textContent = data.movimientosHoy;
+    const totalBodegasElem = document.getElementById("total-bodegas");
+    const totalProductosElem = document.getElementById("total-productos");
+    const movimientosHoyElem = document.getElementById("movimientos-hoy");
+
+    if (totalBodegasElem) totalBodegasElem.textContent = data.totalBodegas;
+    if (totalProductosElem) totalProductosElem.textContent = data.totalProductos;
+    if (movimientosHoyElem) movimientosHoyElem.textContent = data.movimientosHoy;
+    
   } catch (error) {
     console.error("❌ Error al cargar el resumen:", error);
   }
@@ -45,14 +60,23 @@ async function cargarResumen() {
 
 async function cargarMovimientos(url = movimientosBaseUrl) {
   const tbody = document.getElementById("tbody-movimientos");
+  if (!tbody) {
+    console.error("❌ No se encontró tbody-movimientos");
+    return;
+  }
+
   tbody.innerHTML = "<tr><td colspan='8'>Cargando...</td></tr>";
 
   try {
+    console.log('📋 Cargando movimientos...');
     const response = await fetch(url, {
       headers: {
         "Authorization": `Bearer ${userData?.token}`
       }
     });
+    
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
     const movimientos = await response.json();
 
     tbody.innerHTML = "";
@@ -76,7 +100,7 @@ async function cargarMovimientos(url = movimientosBaseUrl) {
         <td>${mov.bodegaDestinoNombre || mov.bodegaDestino || '-'}</td>
         <td>
           <button class="btn-detalles">🔍 Ver detalles</button>
-          ${isAdmin ? `<button class="btn-editar" onclick="editarMovimiento(${mov.id})">✏️ Editar</button>` : ""}
+          ${isAdmin ? `<button class="btn-editar" data-movimiento-id="${mov.id}">✏️ Editar</button>` : ""}
         </td>
       `;
 
@@ -94,6 +118,11 @@ async function cargarMovimientos(url = movimientosBaseUrl) {
         detallesRow.style.display = detallesRow.style.display === "none" ? "table-row" : "none";
       });
 
+      if (isAdmin) {
+        const btnEditar = tr.querySelector(".btn-editar");
+        btnEditar.addEventListener("click", () => editarMovimiento(mov.id));
+      }
+
       tbody.appendChild(tr);
       tbody.appendChild(detallesRow);
     });
@@ -108,12 +137,18 @@ async function filtrarPorFechas() {
   const inicioInput = document.getElementById("fecha-inicio").value;
   const finInput = document.getElementById("fecha-fin").value;
 
-  if (!inicioInput || !finInput) return alert("Selecciona ambas fechas.");
+  if (!inicioInput || !finInput) {
+    alert("Selecciona ambas fechas.");
+    return;
+  }
 
   const inicioISO = new Date(`${inicioInput}T00:00:00`).toISOString();
   const finISO = new Date(`${finInput}T23:59:59`).toISOString();
 
   const url = getRangoUrl(inicioISO, finISO);
-
   await cargarMovimientos(url);
+}
+
+function editarMovimiento(id) {
+  console.log(`✏️ Editando movimiento ${id}`);
 }
