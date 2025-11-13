@@ -1,0 +1,42 @@
+body {
+    font-family: "Poppins", sans-serif;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+.card-bodega {
+  border: none;
+  border-radius: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.card-bodega:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-bodega .card-title {
+  color: #0d6efd;
+  font-weight: 600;
+}
+
+.progress {
+  height: 6px;
+  background-color: #e9ecef;
+  border-radius: 10px;
+}
+
+.progress-bar {
+  transition: width 0.4s ease;
+}
+
+.badge {
+  font-size: 0.75rem;
+}
+
