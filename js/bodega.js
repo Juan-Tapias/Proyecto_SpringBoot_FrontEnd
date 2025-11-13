@@ -2,13 +2,11 @@ import { renderSidebarMenu } from '../components/menu.js';
 
   renderSidebarMenu('.targetSelector');
 
-// 📌 URL base del backend
 const API_URL = "http://localhost:8080/api/bodegas";
 
 const contenedor = document.getElementById("bodegasContainer");
 const searchInput = document.getElementById("searchInput");
 
-// ✅ Cargar bodegas desde el backend
 async function cargarBodegas() {
   try {
     const res = await fetch(API_URL);
@@ -21,7 +19,6 @@ async function cargarBodegas() {
   }
 }
 
-// ✅ Mostrar bodegas en el DOM
 function mostrarBodegas(lista) {
   contenedor.innerHTML = "";
   lista.forEach(b => {
@@ -53,7 +50,6 @@ function mostrarBodegas(lista) {
   });
 }
 
-// ✅ Crear nueva bodega
 document.getElementById("addBodegaBtn").addEventListener("click", async () => {
   const { value: formValues } = await Swal.fire({
     title: "Nueva Bodega",
@@ -94,7 +90,6 @@ document.getElementById("addBodegaBtn").addEventListener("click", async () => {
   }
 });
 
-// ✅ Editar bodega existente
 async function editarBodega(id) {
   try {
     const res = await fetch(`${API_URL}/${id}`);
@@ -132,7 +127,6 @@ async function editarBodega(id) {
   }
 }
 
-// ✅ Eliminar bodega
 async function eliminarBodega(id) {
   const result = await Swal.fire({
     title: "¿Eliminar esta bodega?",
@@ -155,7 +149,6 @@ async function eliminarBodega(id) {
   }
 }
 
-// ✅ Filtro en vivo
 searchInput.addEventListener("keyup", async e => {
   const filtro = e.target.value.toLowerCase();
   try {
@@ -172,5 +165,4 @@ searchInput.addEventListener("keyup", async e => {
   }
 });
 
-// 🚀 Cargar al inicio
 cargarBodegas();

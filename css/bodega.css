@@ -131,7 +131,6 @@ h4 {
   background-color: var(--primary-hover);
 }
 
-/* OUTLINE BUTTON (opcional, si usas más estilos) */
 .btn-outline-primary {
   background-color: transparent;
   border-color: var(--primary);
@@ -142,13 +141,12 @@ h4 {
   color: white;
 }
 
-/* ====== ICONS (sin Bootstrap Icons) ====== */
 .bi {
   font-style: normal;
   font-weight: normal;
 }
 
-/* Puedes simular íconos si no usas bootstrap-icons */
+
 .bi-buildings::before {
   content: "🏢";
 }
@@ -171,7 +169,6 @@ h4 {
   filter: brightness(1.05);
 }
 
-/* ====== OPTIONAL: Smooth fade-in animation ====== */
 .main-content {
   animation: fadeIn 0.3s ease-in;
 }
