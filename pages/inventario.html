@@ -16,6 +16,19 @@
             <section class="productos">
                 <div id="producto-data"></div>
             </section>
+            <div id="modal-editar" class="modal hidden">
+            <div class="modal-content">
+                <h2>Editar Producto</h2>
+                <form id="form-editar">
+                <input type="text" id="editar-nombre" placeholder="Nombre">
+                <input type="text" id="editar-categoria" placeholder="Categoría">
+                <input type="number" id="editar-precio" placeholder="Precio">
+                <input type="number" id="editar-stock" placeholder="Stock">
+                <button type="submit">Guardar</button>
+                <button type="button" id="cerrar-modal">Cancelar</button>
+                </form>
+            </div>
+            </div>
         </main>
     </div>
 </body>
