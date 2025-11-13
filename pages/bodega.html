@@ -9,32 +9,44 @@
     <title>Bodega</title>
 </head>
 <body>
-<div class="app-container">
-    
-    <div class="sidebar">
+ <div class="app-container">
+  <div class="sidebar">
     <div class="targetSelector"></div>
-    </div>
-
-<main class="main-content">
-    <div class="container">
-    <header class="header">
-      <h2>🏢 <span>Gestión de Bodegas</span></h2>
-      <div class="controls">
-        <input type="text" id="searchInput" placeholder="Buscar bodega...">
-        <button id="addBodegaBtn">+ Nueva Bodega</button>
-      </div>
-    </header>
-
-    <main id="bodegasContainer" class="bodegas-container">
-      <!-- Aquí se cargan las tarjetas dinámicamente -->
-    </main>
   </div>
-</main>
+
+  <div class="main-content">
+    <div class="container">
+      <header class="header">
+        <h2>🏢 <span>Gestión de Bodegas</span></h2>
+        <div class="controls">
+          <input type="text" id="searchInput" placeholder="Buscar bodega...">
+          <button id="addBodegaBtn">+ Nueva Bodega</button>
+        </div>
+      </header>
+
+      <section id="bodegasContainer" class="bodegas-container">
+        <!-- Tarjetas de bodegas -->
+      </section>
+    </div>
+  </div>
+</div>
+  <div id="modal" class="modal">
+  <div class="modal-content">
+    <h3 id="modal-title">Título</h3>
+    <div id="modal-body">
+      <!-- Inputs dinámicos aquí -->
+    </div>
+    <div class="modal-actions">
+      <button id="modal-cancel">Cancelar</button>
+      <button id="modal-ok">Guardar</button>
+    </div>
+  </div>
 </div>
 </body>
+
 <script type="module">
     import { renderSidebarMenu } from '/components/menu.js';
     renderSidebarMenu('.sidebar-container');
   </script>
-<script type="module" src="/js/bodega.js"></script>
+<script type="module" src="/js/bodega.js" defer></script>
 </html>

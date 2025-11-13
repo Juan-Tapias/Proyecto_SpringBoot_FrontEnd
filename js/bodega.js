@@ -7,6 +7,23 @@ const API_URL = "http://localhost:8080/api/bodegas";
 const container = document.getElementById("bodegasContainer");
 const addBtn = document.getElementById("addBodegaBtn");
 
+const modal = document.getElementById("modal");
+const modalTitle = document.getElementById("modal-title");
+const modalBody = document.getElementById("modal-body");
+const modalOk = document.getElementById("modal-ok");
+const modalCancel = document.getElementById("modal-cancel");
+
+// Función para abrir modal
+function openModal(title, bodyHTML, onConfirm) {
+  modalTitle.innerText = title;
+  modalBody.innerHTML = bodyHTML;
+  modal.style.display = "flex";
+
+  const cleanup = () => { modal.style.display = "none"; modalOk.onclick = null; modalCancel.onclick = null; };
+  modalCancel.onclick = cleanup;
+  modalOk.onclick = () => { onConfirm(); cleanup(); };
+}
+
 // Cargar bodegas
 async function cargarBodegas() {
   container.innerHTML = "";
@@ -25,106 +42,73 @@ async function cargarBodegas() {
         <p><b>Capacidad:</b> ${bodega.capacidad} unidades</p>
         <div class="progress"><div class="progress-bar" style="width: ${Math.min(bodega.capacidad / 100, 100)}%;"></div></div>
         <div class="actions">
-          <button class="edit-btn" onclick="editarBodega('${bodega.id}')">✏️ Editar</button>
-          <button class="delete-btn" onclick="eliminarBodega('${bodega.id}')">🗑️ Eliminar</button>
+          <button class="edit-btn">✏️ Editar</button>
+          <button class="delete-btn">🗑️ Eliminar</button>
         </div>
       `;
       container.appendChild(card);
+
+      // Editar
+      card.querySelector(".edit-btn").onclick = () => {
+        openModal("Editar Bodega", `
+          <input id="nombre" value="${bodega.nombre}">
+          <input id="ubicacion" value="${bodega.ubicacion}">
+          <input id="encargado" value="${bodega.encargado}">
+          <input id="capacidad" type="number" value="${bodega.capacidad}">
+        `, async () => {
+          const nombre = document.getElementById("nombre").value.trim();
+          const ubicacion = document.getElementById("ubicacion").value.trim();
+          const encargado = document.getElementById("encargado").value.trim();
+          const capacidad = parseInt(document.getElementById("capacidad").value);
+          if(!nombre || !ubicacion || !encargado || isNaN(capacidad)){
+            alert("Todos los campos son obligatorios");
+            return;
+          }
+          await fetch(`${API_URL}/${bodega.id}`, {
+            method: "PUT",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({nombre, ubicacion, encargado, capacidad})
+          });
+          cargarBodegas();
+        });
+      };
+
+      // Eliminar
+      card.querySelector(".delete-btn").onclick = () => {
+        openModal("Eliminar Bodega", `<p>¿Seguro que deseas eliminar la bodega <b>${bodega.nombre}</b>?</p>`, async () => {
+          await fetch(`${API_URL}/${bodega.id}`, { method: "DELETE" });
+          cargarBodegas();
+        });
+      };
     });
-  } catch (err) {
+  } catch(err) {
     console.error("Error al cargar bodegas:", err);
   }
 }
 
-// Crear bodega con SweetAlert
-addBtn.addEventListener("click", async () => {
-  const { value: formValues } = await Swal.fire({
-    title: "Nueva Bodega",
-    html: `
-      <input id="nombre" class="swal2-input" placeholder="Nombre">
-      <input id="ubicacion" class="swal2-input" placeholder="Ubicación">
-      <input id="encargado" class="swal2-input" placeholder="Encargado">
-      <input id="capacidad" type="number" class="swal2-input" placeholder="Capacidad">
-    `,
-    confirmButtonText: "Guardar",
-    showCancelButton: true,
-    focusConfirm: false,
-    preConfirm: () => {
-      const nombre = document.getElementById("nombre").value.trim();
-      const ubicacion = document.getElementById("ubicacion").value.trim();
-      const encargado = document.getElementById("encargado").value.trim();
-      const capacidad = parseInt(document.getElementById("capacidad").value);
-      if (!nombre || !ubicacion || !encargado || isNaN(capacidad)) {
-        Swal.showValidationMessage("Todos los campos son obligatorios");
-        return false;
-      }
-      return { nombre, ubicacion, encargado, capacidad };
+// Crear nueva bodega
+addBtn.onclick = () => {
+  openModal("Nueva Bodega", `
+    <input id="nombre" placeholder="Nombre">
+    <input id="ubicacion" placeholder="Ubicación">
+    <input id="encargado" placeholder="Encargado">
+    <input id="capacidad" type="number" placeholder="Capacidad">
+  `, async () => {
+    const nombre = document.getElementById("nombre").value.trim();
+    const ubicacion = document.getElementById("ubicacion").value.trim();
+    const encargado = document.getElementById("encargado").value.trim();
+    const capacidad = parseInt(document.getElementById("capacidad").value);
+    if(!nombre || !ubicacion || !encargado || isNaN(capacidad)){
+      alert("Todos los campos son obligatorios");
+      return;
     }
-  });
-
-  if (formValues) {
     await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formValues)
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({nombre, ubicacion, encargado, capacidad})
     });
-    Swal.fire("✅ Agregada", "La bodega fue creada correctamente", "success");
     cargarBodegas();
-  }
-});
-
-// Editar
-async function editarBodega(id) {
-  const res = await fetch(`${API_URL}/${id}`);
-  const bodega = await res.json();
-
-  const { value: formValues } = await Swal.fire({
-    title: "Editar Bodega",
-    html: `
-      <input id="nombre" class="swal2-input" value="${bodega.nombre}">
-      <input id="ubicacion" class="swal2-input" value="${bodega.ubicacion}">
-      <input id="encargado" class="swal2-input" value="${bodega.encargado}">
-      <input id="capacidad" type="number" class="swal2-input" value="${bodega.capacidad}">
-    `,
-    confirmButtonText: "Guardar Cambios",
-    showCancelButton: true,
-    preConfirm: () => {
-      return {
-        nombre: document.getElementById("nombre").value.trim(),
-        ubicacion: document.getElementById("ubicacion").value.trim(),
-        encargado: document.getElementById("encargado").value.trim(),
-        capacidad: parseInt(document.getElementById("capacidad").value)
-      };
-    }
   });
-
-  if (formValues) {
-    await fetch(`${API_URL}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formValues)
-    });
-    Swal.fire("✅ Editada", "La bodega fue actualizada", "success");
-    cargarBodegas();
-  }
-}
-
-// Eliminar
-async function eliminarBodega(id) {
-  const confirm = await Swal.fire({
-    title: "¿Eliminar bodega?",
-    text: "Esta acción no se puede deshacer",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar"
-  });
-
-  if (confirm.isConfirmed) {
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-    Swal.fire("Eliminada", "La bodega fue eliminada correctamente", "success");
-    cargarBodegas();
-  }
-}
+};
 
 cargarBodegas();
