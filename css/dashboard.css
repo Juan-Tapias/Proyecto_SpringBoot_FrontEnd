@@ -28,21 +28,128 @@
 }
 
 .informacion>div{
-    width: 350px;
+    width: 400px;
     height: 150px;
     border-left: 5px solid #195366;
     border-radius: 20px;
     padding: 10px;
-}
-
-.informacion>div:hover{
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+
 }
 
 .informacion{
+    border-radius: 10px;
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    justify-content: space-between;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     gap: 30px;
     padding: 10px;
+}
+.informacion p:first-child {
+  font-weight: 800;
+  color: #555;
+}
+
+.informacion p:last-child {
+  font-size: 4rem;
+  color: #807a7a;
+}
+
+.movimientos {
+  margin: 20px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#tabla-movimientos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#tabla-movimientos th, #tabla-movimientos td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+#tabla-movimientos th {
+  background: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+}
+
+#tabla-movimientos tr:hover {
+  background: #f9f9f9;
+}
+
+.btn-editar {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-editar:hover {
+  background: #0056b3;
+}
+.detalles-row td {
+  background: #f7fafd;
+  border-top: 1px solid #ecf0f1;
+  padding: 16px;
+}
+
+.detalles-contenido {
+  animation: fadeIn 0.3s ease;
+}
+
+.detalles-contenido h4 {
+  margin-bottom: 8px;
+  color: #2980b9;
+}
+
+.detalle-lista {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.detalle-lista li {
+  padding: 6px 0;
+  border-bottom: 1px solid #eaeaea;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.filtros-fecha {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filtros-fecha input {
+  padding: 4px 8px;
+}
+
+.filtros-fecha button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+.filtros-fecha button:hover {
+  background-color: #0056b3;
 }
