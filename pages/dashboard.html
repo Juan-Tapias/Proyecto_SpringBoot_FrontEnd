@@ -14,6 +14,7 @@
     <main class="main-content">
       <h1>Dashboard</h1>
       <hr>
+      <br>
       <section class="informacion">
         <div class="bodegas">
           <p>Total Bodegas</p>
@@ -24,20 +25,37 @@
           <p id="total-productos"></p>
         </div>
         <div>
-          <p>Movimientos Hoy</p>
+          <p>Movimientos hoy</p>
           <p id="movimientos-hoy"></p>
         </div>
       </section>
-      <section class="movimientos">
-        <div id="movimientos"></div>
-      </section>
+    <section class="movimientos">
+      <h1>Movimientos</h1>
+
+      <div class="filtros-fecha">
+        <label>Desde: <input type="date" id="fecha-inicio"></label>
+        <label>Hasta: <input type="date" id="fecha-fin"></label>
+        <button id="btn-filtrar">🔎 Filtrar</button>
+        <button id="btn-limpiar">♻️ Limpiar</button>
+      </div>
+      <table id="tabla-movimientos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Usuario</th>
+            <th>Comentario</th>
+            <th>Bodega Origen</th>
+            <th>Bodega Destino</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-movimientos"></tbody>
+      </table>
+    </section>
     </main>
   </div>
-
-  <script type="module">
-    import { renderSidebarMenu } from '/components/menu.js';
-    renderSidebarMenu('.sidebar-container');
-  </script>
-  <script type="module" src="/js/dashboard.js"></script>
 </body>
+<script type="module" src="/js/dashboard.js"></script>
 </html>
