@@ -120,6 +120,10 @@ async function eliminarProducto(productoId, rol) {
 
 
 function mostrarVentanaEditar(producto, rol) {
+
+  console.log("Entre");
+  
+
   const modal = document.getElementById("modal-editar");
   if (!modal) return;
 
@@ -160,6 +164,9 @@ function mostrarVentanaEditar(producto, rol) {
   }
 
   btnEliminar.onclick = () => eliminarProducto(producto.id, rol);
+
+  console.log("Sali");
+  
 }
 
 

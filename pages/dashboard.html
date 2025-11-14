@@ -1,32 +1,36 @@
 <h1>Dashboard</h1>
 <hr>
 <br>
-<section class="informacion">
-  <div class="bodegas">
+
+<section class="dashboard-info">
+  <div class="dashboard-card">
     <p>Total Bodegas</p>
     <p id="total-bodegas"></p>
   </div>
-  <div>
+
+  <div class="dashboard-card">
     <p>Total Productos</p>
     <p id="total-productos"></p>
   </div>
-  <div>
+
+  <div class="dashboard-card">
     <p>Movimientos hoy</p>
     <p id="movimientos-hoy"></p>
   </div>
 </section>
 
-<section class="movimientos">
+<section class="dashboard-movimientos">
   <h1>Movimientos</h1>
 
-  <div class="filtros-fecha">
+  <div class="dashboard-filtros-fecha">
     <label>Desde: <input type="date" id="fecha-inicio"></label>
     <label>Hasta: <input type="date" id="fecha-fin"></label>
+
     <button id="btn-filtrar">🔎 Filtrar</button>
     <button id="btn-limpiar">♻️ Limpiar</button>
   </div>
 
-  <table id="tabla-movimientos">
+  <table id="dashboard-tabla-movimientos">
     <thead>
       <tr>
         <th>ID</th>
@@ -39,6 +43,7 @@
         <th>Acciones</th>
       </tr>
     </thead>
-    <tbody id="tbody-movimientos"></tbody>
+
+    <tbody id="dashboard-tbody-movimientos"></tbody>
   </table>
 </section>
