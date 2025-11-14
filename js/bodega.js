@@ -1,274 +1,327 @@
-// ======================================================
-// 🗂️  CONFIGURACIÓN
-// ======================================================
+export function initBodegas() {
+  const userData = JSON.parse(sessionStorage.getItem("userData"));
+  const isAdmin = userData?.rol === "ADMIN";
+  const bodegasBaseUrl = isAdmin
+    ? `http://localhost:8080/api/admin/bodegas?usuarioId=${userData.id}`
+    : `http://localhost:8080/api/empleado/bodegas?usuarioId=${userData.id}`;
+  
+  const container = document.getElementById("bodegasContainer");
+  const addBtn = document.getElementById("addBodegaBtn");
+  const modal = document.getElementById("modal");
+  const modalTitle = document.getElementById("modal-title");
+  const modalBody = document.getElementById("modal-body");
+  const modalOk = document.getElementById("modal-ok");
+  const modalCancel = document.getElementById("modal-cancel");
 
-const userData = JSON.parse(sessionStorage.getItem("userData"));
-const isAdmin = userData?.rol === "ADMIN";
+  if (addBtn) {
+    const nuevoAddBtn = addBtn.cloneNode(true);
+    addBtn.parentNode.replaceChild(nuevoAddBtn, addBtn);
+    nuevoAddBtn.addEventListener("click", showNewModal);
+  }
 
-const BASE_URL = isAdmin
-    ? "http://localhost:8080/api/admin/bodegas"
-    : `http://localhost:8080/api/empleado/bodegas?usuarioId=${userData?.id}`;
+  cargarBodegas();
 
-
-// ======================================================
-// 📌 CARGAR BODEGAS
-// ======================================================
-
-export async function cargarBodegas() {
-    try {
-        const response = await fetch(BASE_URL);
-
-        if (!response.ok) throw new Error("HTTP " + response.status);
-
-        const bodegas = await response.json();
-        mostrarBodegas(bodegas);
-
-    } catch (error) {
-        console.error("❌ Error al cargar bodegas:", error);
+  function openModal(title, bodyHTML, onConfirm) {
+    modalTitle.innerText = title;
+    modalBody.innerHTML = bodyHTML;
+    modal.style.display = "flex";
+    
+    const form = modalBody.querySelector("form");
+    if (form) {
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        await onConfirm();
+      };
     }
-}
-
-
-// ======================================================
-// 📌 MOSTRAR BODEGAS EN CARDS
-// ======================================================
-
-function mostrarBodegas(bodegas) {
-    const cont = document.getElementById("bodegasContainer");
-    cont.innerHTML = "";
-
-    bodegas.forEach(b => {
-        const card = document.createElement("div");
-        card.classList.add("bodega-card");
-
-        card.innerHTML = `
-            <h3>${b.nombre}</h3>
-
-            <p><strong>Ubicación:</strong> ${b.ubicacion}</p>
-            <p><strong>Capacidad:</strong> ${b.capacidad}</p>
-            <p><strong>Encargado:</strong> ${b.encargadoNombre ?? "Sin encargado"}</p>
-
-            ${
-                isAdmin
-                    ? `
-                    <div class="card-actions">
-                        <button class="btn-editar" data-id="${b.id}">Editar</button>
-                        <button class="btn-eliminar" data-id="${b.id}">Eliminar</button>
-                    </div>
-                    `
-                    : ""
-            }
-        `;
-
-        cont.appendChild(card);
-    });
-
-    if (isAdmin) activarBotonesEdicion();
-}
-
-
-// ======================================================
-// 📌 BOTONES EDITAR / ELIMINAR
-// ======================================================
-
-function activarBotonesEdicion() {
-    document.querySelectorAll(".btn-editar").forEach(btn => {
-        btn.addEventListener("click", () => abrirModalEditar(btn.dataset.id));
-    });
-
-    document.querySelectorAll(".btn-eliminar").forEach(btn => {
-        btn.addEventListener("click", () => eliminarBodega(btn.dataset.id));
-    });
-}
-
-
-// ======================================================
-// 📌 ABRIR MODAL PARA CREAR
-// ======================================================
-
-document.getElementById("addBodegaBtn").addEventListener("click", () => {
-    abrirModal("Nueva Bodega", `
-        <label>Nombre</label>
-        <input id="nombre" type="text">
-
-        <label>Ubicación</label>
-        <input id="ubicacion" type="text">
-
-        <label>Capacidad</label>
-        <input id="capacidad" type="number">
-
-        <label>ID Encargado</label>
-        <input id="encargadoId" type="number">
-    `);
-
-    document.getElementById("modal-ok").onclick = crearBodega;
-});
-
-
-// ======================================================
-// 📌 ABRIR MODAL PARA EDITAR
-// ======================================================
-
-async function abrirModalEditar(id) {
-    try {
-        const response = await fetch(`http://localhost:8080/api/admin/bodegas/${id}`);
-
-        if (!response.ok) throw new Error("HTTP " + response.status);
-
-        const b = await response.json();
-
-        abrirModal("Editar Bodega", `
-            <input id="bodega-id" type="hidden" value="${id}">
-
-            <label>Nombre</label>
-            <input id="nombre" type="text" value="${b.nombre}">
-
-            <label>Ubicación</label>
-            <input id="ubicacion" type="text" value="${b.ubicacion}">
-
-            <label>Capacidad</label>
-            <input id="capacidad" type="number" value="${b.capacidad}">
-
-            <label>ID Encargado</label>
-            <input id="encargadoId" type="number" value="${b.encargadoId ?? ""}">
-        `);
-
-        document.getElementById("modal-ok").onclick = actualizarBodega;
-
-    } catch (err) {
-        console.error("❌ Error cargando bodega:", err);
-    }
-}
-
-
-// ======================================================
-// 📌 CREAR BODEGA
-// ======================================================
-
-async function crearBodega() {
-    const bodega = obtenerDatosFormulario();
-
-    try {
-        const response = await fetch("http://localhost:8080/api/admin/bodegas", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bodega)
-        });
-
-        if (!response.ok) throw new Error("HTTP " + response.status);
-
-        cerrarModal();
-        cargarBodegas();
-
-    } catch (err) {
-        console.error("❌ Error al crear:", err);
-    }
-}
-
-
-// ======================================================
-// 📌 ACTUALIZAR BODEGA
-// ======================================================
-
-async function actualizarBodega() {
-    const id = document.getElementById("bodega-id").value;
-    const bodega = obtenerDatosFormulario();
-
-    try {
-        const response = await fetch(`http://localhost:8080/api/admin/bodegas/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bodega)
-        });
-
-        if (!response.ok) throw new Error("HTTP " + response.status);
-
-        cerrarModal();
-        cargarBodegas();
-
-    } catch (err) {
-        console.error("❌ Error al actualizar:", err);
-    }
-}
-
-
-// ======================================================
-// 📌 ELIMINAR BODEGA
-// ======================================================
-
-async function eliminarBodega(id) {
-    if (!confirm("¿Eliminar esta bodega?")) return;
-
-    try {
-        const res = await fetch(`http://localhost:8080/api/admin/bodegas/${id}`, {
-            method: "DELETE"
-        });
-
-        if (!res.ok) throw new Error("HTTP " + res.status);
-
-        cargarBodegas();
-    }
-    catch (err) {
-        console.error("❌ Error eliminando:", err);
-    }
-}
-
-
-// ======================================================
-// 📌 UTILIDADES
-// ======================================================
-
-function obtenerDatosFormulario() {
-    return {
-        nombre: document.getElementById("nombre").value,
-        ubicacion: document.getElementById("ubicacion").value,
-        capacidad: parseInt(document.getElementById("capacidad").value),
-        encargadoId: parseInt(document.getElementById("encargadoId").value) || null,
-        usuarioId: userData.id
+    
+    modalOk.onclick = null;
+    modalCancel.onclick = null;
+    modalCancel.onclick = () => {
+      modal.style.display = "none";
+      modalOk.onclick = null;
+      modalCancel.onclick = null;
     };
-}
+    modalOk.onclick = async (e) => {
+      e?.preventDefault?.();
+      await onConfirm();
+      modal.style.display = "none";
+      modalOk.onclick = null;
+      modalCancel.onclick = null;
+    };
+  }
 
-
-// ======================================================
-// 📌 MODAL - ABRIR / CERRAR
-// ======================================================
-
-function abrirModal(titulo, contenidoHTML) {
-    document.getElementById("modal-title").innerText = titulo;
-    document.getElementById("modal-body").innerHTML = contenidoHTML;
-
-    document.getElementById("modal").classList.add("show");
-}
-
-function cerrarModal() {
-    document.getElementById("modal").classList.remove("show");
-}
-
-document.getElementById("modal-cancel").addEventListener("click", cerrarModal);
-
-
-// ======================================================
-// 📌 BUSCAR BODEGA
-// ======================================================
-
-document.getElementById("searchInput").addEventListener("input", (e) => {
-    const query = e.target.value.toLowerCase();
-
-    document.querySelectorAll(".bodega-card").forEach(card => {
-        card.style.display =
-            card.innerText.toLowerCase().includes(query)
-                ? "block"
-                : "none";
+async function cargarBodegas() {
+  container.innerHTML = "<p>Cargando bodegas...</p>";
+  try {
+    console.log("🔍 Cargando bodegas desde:", bodegasBaseUrl)
+    
+    const res = await fetch(bodegasBaseUrl, {
+      headers: { 
+        "Authorization": `Bearer ${userData.token}`,
+        "Content-Type": "application/json"
+      }
     });
-});
-
-
-// ======================================================
-// 🚀 INICIALIZAR AUTOMÁTICO SI ESTA VISTA ESTÁ CARGADA
-// ======================================================
-
-document.addEventListener("DOMContentLoaded", () => {
-    if (document.getElementById("bodegasContainer")) {
-        cargarBodegas();
+    
+    console.log("📊 Response status:", res.status);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("❌ Error response:", errorText);
+      throw new Error(`HTTP ${res.status}: ${errorText}`);
     }
-});
+    
+    let bodegas = await res.json();
+    console.log("✅ Bodegas cargadas:", bodegas);
+    
+    if (!Array.isArray(bodegas) || bodegas.length === 0) {
+      container.innerHTML = "<p>No hay bodegas registradas.</p>";
+      return;
+    }
+    
+    container.innerHTML = "";
+    bodegas.forEach(bodega => {
+      const card = document.createElement("div");
+      card.classList.add("bodega-card");
+      card.innerHTML = `
+        <h3>${bodega.nombre}</h3>
+        <p><b>Ubicación:</b> ${bodega.ubicacion || 'No especificada'}</p>
+        <p><b>Encargado:</b> ${bodega.encargadoUserName || "Sin encargado"}</p>
+        <p><b>Capacidad:</b> ${bodega.capacidad || 0} unidades</p>
+        <div class="actions">
+          ${isAdmin ? `<button class="edit-btn" data-id="${bodega.id}">Editar</button>` : ""}
+          ${isAdmin ? `<button class="delete-btn" data-id="${bodega.id}">Eliminar</button>` : ""}
+        </div>
+      `;
+      
+      container.appendChild(card);
+    });
+
+    // Agregar event listeners después de crear todas las tarjetas
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const bodegaId = e.target.getAttribute("data-id");
+        const bodega = bodegas.find(b => b.id == bodegaId);
+        if (bodega) {
+          abrirVentanaEditarBodega(bodega);
+        }
+      });
+    });
+
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const bodegaId = e.target.getAttribute("data-id");
+        console.log("🗑️ Eliminando bodega ID:", bodegaId);
+        if (bodegaId) {
+          eliminarBodega(bodegaId);
+        } else {
+          console.error("❌ ID de bodega no encontrado");
+          alert("Error: No se pudo identificar la bodega a eliminar");
+        }
+      });
+    });
+
+    // Buscador
+    document.getElementById("searchInput").oninput = function (e) {
+      const q = e.target.value.toLowerCase();
+      container.querySelectorAll(".bodega-card").forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(q) ? "" : "none";
+      });
+    };
+    
+  } catch (err) {
+    console.error("❌ Error al cargar bodegas", err);
+    container.innerHTML = `<p style='color:red;'>Error al cargar bodegas: ${err.message}</p>`;
+  }
+}
+  function abrirVentanaEditarBodega(bodega) {
+    console.log("📝 Editando bodega:", bodega);
+    
+    openModal(
+      "Editar Bodega",
+      `
+        <form id="form-editar-bodega">
+          <label>Nombre:</label>
+          <input id="editar-nombre" value="${bodega.nombre || ''}" placeholder="Nombre" required>
+          <br>
+          <label>Ubicación:</label>
+          <input id="editar-ubicacion" value="${bodega.ubicacion || ''}" placeholder="Ubicación" required>
+          <br>
+          <label>Capacidad:</label>
+          <input id="editar-capacidad" type="number" value="${bodega.capacidad || ''}" placeholder="Capacidad" required>
+          <br>
+          <label>Usuario Encargado:</label>
+          <input id="editar-encargadoUserName" value="${bodega.encargadoNombre || ''}" placeholder="Usuario encargado" required>
+          <br>
+          <button type="submit" style="display:none"></button>
+        </form>
+      `,
+      async () => {
+        try {
+          const nombre = document.getElementById("editar-nombre").value.trim();
+          const ubicacion = document.getElementById("editar-ubicacion").value.trim();
+          const capacidad = parseInt(document.getElementById("editar-capacidad").value, 10);
+          const encargadoUserName = document.getElementById("editar-encargadoUserName").value.trim();
+          
+          if (!nombre || !ubicacion || isNaN(capacidad) || !encargadoUserName) {
+            alert("Todos los campos son obligatorios");
+            return;
+          }
+          
+          const requestBody = { 
+            nombre, 
+            ubicacion, 
+            capacidad, 
+            encargadoUserName 
+          };
+          
+          console.log("📤 Editando bodega ID:", bodega.id, "Datos:", requestBody);
+          
+          const url = `http://localhost:8080/api/admin/bodegas/${bodega.id}?usuarioId=${userData.id}`;
+          console.log("🔗 URL:", url);
+          
+          const res = await fetch(url, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${userData.token}`
+            },
+            body: JSON.stringify(requestBody)
+          });
+          
+          console.log("📊 Edit response status:", res.status);
+          
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("❌ Edit error:", errorText);
+            alert(`❌ Error al editar. Código: ${res.status}. ${errorText}`);
+            return;
+          }
+          
+          alert("✅ Bodega editada correctamente");
+          cargarBodegas();
+          
+        } catch (err) {
+          console.error("❌ Error en edición:", err);
+          alert("Error inesperado: " + err.message);
+        }
+      }
+    );
+  }
+  
+  async function eliminarBodega(id) {
+    console.log("🗑️ Eliminando bodega ID:", id);
+    
+    if (!id) {
+      console.error("❌ ID de bodega es undefined");
+      alert("Error: No se pudo identificar la bodega a eliminar");
+      return;
+    }
+    
+    if (!confirm("¿Seguro que deseas eliminar esta bodega?")) return;
+    
+    try {
+      const url = `http://localhost:8080/api/admin/bodegas/${id}?usuarioId=${userData.id}`;
+      console.log("🔗 URL de eliminación:", url);
+      
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: { 
+          "Authorization": `Bearer ${userData.token}`,
+          "Content-Type": "application/json"
+        }
+      });
+      
+      console.log("📊 Delete response status:", res.status);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("❌ Delete error:", errorText);
+        alert(`❌ Error al eliminar. Código: ${res.status}. ${errorText}`);
+        return;
+      }
+      
+      alert("✅ Bodega eliminada correctamente");
+      cargarBodegas();
+      
+    } catch (err) {
+      console.error("❌ Error en eliminación:", err);
+      alert("Error inesperado: " + err.message);
+    }
+  }
+
+  function showNewModal() {
+    if (!isAdmin) {
+      alert("Solo administradores pueden crear bodegas");
+      return;
+    }
+    
+    openModal(
+      "Nueva Bodega",
+      `
+        <form id="form-nueva-bodega">
+          <label>Nombre:</label>
+          <input id="nombre" placeholder="Nombre" required>
+          <br>
+          <label>Ubicación:</label>
+          <input id="ubicacion" placeholder="Ubicación" required>
+          <br>
+          <label>Capacidad:</label>
+          <input id="capacidad" type="number" placeholder="Capacidad" required>
+          <br>
+          <label>Usuario Encargado:</label>
+          <input id="encargadoUserName" placeholder="Usuario encargado" required>
+          <br>
+          <button type="submit" style="display:none"></button>
+        </form>
+      `,
+      async () => {
+        try {
+          const nombre = document.getElementById("nombre").value.trim();
+          const ubicacion = document.getElementById("ubicacion").value.trim();
+          const capacidad = parseInt(document.getElementById("capacidad").value, 10);
+          const encargadoUserName = document.getElementById("encargadoUserName").value.trim();
+          
+          if (!nombre || !ubicacion || isNaN(capacidad) || !encargadoUserName) {
+            alert("Todos los campos son obligatorios");
+            return;
+          }
+          
+          const requestBody = { 
+            nombre, 
+            ubicacion, 
+            capacidad, 
+            encargadoUserName 
+          };
+          
+          console.log("📤 Creando bodega:", requestBody);
+          
+          const url = `http://localhost:8080/api/admin/bodegas?usuarioId=${userData.id}`;
+          const res = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${userData.token}`
+            },
+            body: JSON.stringify(requestBody)
+          });
+          
+          console.log("📊 Create response status:", res.status);
+          
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("❌ Create error:", errorText);
+            alert(`❌ Error al crear. Código: ${res.status}. ${errorText}`);
+            return;
+          }
+          
+          alert("✅ Bodega creada correctamente");
+          cargarBodegas();
+          
+        } catch (err) {
+          console.error("❌ Error en creación:", err);
+          alert("Error inesperado: " + err.message);
+        }
+      }
+    );
+  }
+}
