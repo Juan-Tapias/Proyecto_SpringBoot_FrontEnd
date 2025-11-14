@@ -96,7 +96,6 @@ async function cargarBodegas() {
       container.appendChild(card);
     });
 
-    // Agregar event listeners después de crear todas las tarjetas
     document.querySelectorAll(".edit-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         const bodegaId = e.target.getAttribute("data-id");
@@ -120,7 +119,6 @@ async function cargarBodegas() {
       });
     });
 
-    // Buscador
     document.getElementById("searchInput").oninput = function (e) {
       const q = e.target.value.toLowerCase();
       container.querySelectorAll(".bodega-card").forEach(card => {
