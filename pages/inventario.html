@@ -3,6 +3,7 @@
 <section class="productos">
     <div id="producto-data"></div>
 </section>
+
 <div id="modal-editar" class="modal hidden">
     <div class="modal-content">
         <h2>Editar Producto</h2>
@@ -13,6 +14,20 @@
             <input type="number" id="editar-stock" placeholder="Stock">
             <button type="submit">Guardar</button>
             <button type="button" id="cerrar-modal">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<div id="modal-agregar" class="modal hidden">
+    <div class="modal-content">
+        <h2>Agregar Producto</h2>
+        <form id="form-agregar">
+            <input type="text" id="agregar-nombre" placeholder="Nombre" required>
+            <input type="text" id="agregar-categoria" placeholder="Categoría" required>
+            <input type="number" id="agregar-precio" placeholder="Precio" required>
+            <input type="number" id="agregar-stock" placeholder="Stock" required>
+            <button type="submit">Agregar</button>
+            <button type="button" id="cerrar-modal-agregar">Cancelar</button>
         </form>
     </div>
 </div>
