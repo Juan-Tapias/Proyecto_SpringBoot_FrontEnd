@@ -1,52 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/menu.css">
-    <link rel="stylesheet" href="/css/bodega.css">
-
-    <title>Bodega</title>
-</head>
-<body>
- <div class="app-container">
-  <div class="sidebar">
-    <div class="targetSelector"></div>
-  </div>
-
-  <div class="main-content">
-    <div class="container">
-      <header class="header">
-        <h2>🏢 <span>Gestión de Bodegas</span></h2>
-        <div class="controls">
-          <input type="text" id="searchInput" placeholder="Buscar bodega...">
-          <button id="addBodegaBtn">+ Nueva Bodega</button>
-        </div>
-      </header>
-
-      <section id="bodegasContainer" class="bodegas-container">
-        <!-- Tarjetas de bodegas -->
-      </section>
+<div class="container">
+  <header class="header">
+    <h2>🏢 <span>Gestión de Bodegas</span></h2>
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="Buscar bodega...">
+      <button id="addBodegaBtn">+ Nueva Bodega</button>
     </div>
-  </div>
+  </header>
+
+  <section id="bodegasContainer" class="bodegas-container">
+  </section>
 </div>
-  <div id="modal" class="modal">
+
+<div id="modal" class="modal">
   <div class="modal-content">
     <h3 id="modal-title">Título</h3>
-    <div id="modal-body">
-      <!-- Inputs dinámicos aquí -->
-    </div>
+    <div id="modal-body"></div>
+
     <div class="modal-actions">
       <button id="modal-cancel">Cancelar</button>
       <button id="modal-ok">Guardar</button>
     </div>
   </div>
 </div>
-</body>
-
-<script type="module">
-    import { renderSidebarMenu } from '/components/menu.js';
-    renderSidebarMenu('.sidebar-container');
-  </script>
-<script type="module" src="/js/bodega.js" defer></script>
-</html>
