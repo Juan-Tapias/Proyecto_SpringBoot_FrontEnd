@@ -7,7 +7,7 @@ export function initBodegas() {
   
   const container = document.getElementById("bodegasContainer");
   const addBtn = document.getElementById("addBodegaBtn");
-  const modal = document.getElementById("modal");
+  const modal = document.getElementById("bodega-modal");
   const modalTitle = document.getElementById("modal-title");
   const modalBody = document.getElementById("modal-body");
   const modalOk = document.getElementById("modal-ok");

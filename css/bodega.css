@@ -1,17 +1,18 @@
+/* =================================== */
+/*   ESTILOS EXCLUSIVOS DE BODEGAS     */
+/* =================================== */
+
 .bodegas-container {
   flex: 1 1 auto;
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
-  overflow-y: auto; /* scroll vertical solo si hay overflow */
+  overflow-y: auto;
   padding-right: 5px;
-
-  /* Opcional: estilo moderno de scrollbar */
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #007bff transparent; /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #007bff transparent;
 }
 
-/* Chrome, Edge y Safari */
 .bodegas-container::-webkit-scrollbar {
   width: 6px;
 }
@@ -25,47 +26,39 @@
   border-radius: 3px;
 }
 
-/* Header */
-.header {
+/* HEADER */
+.bodega-header {
   display: flex;
-  flex-direction: column; /* 👈 apila el título y los controles */
-  align-items: flex-start; /* usa 'center' si quieres el título centrado */
+  flex-direction: column;
+  align-items: flex-start;
   text-align: left;
   margin-bottom: 20px;
 }
 
-.header h2 {
-  margin: 0 0 10px 0; /* separa el título del buscador */
+.bodega-header h2 {
+  margin: 0 0 10px 0;
   color: #0056d6;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.controls {
+/* CONTROLES */
+.bodega-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  justify-content: flex-start; /* 👈 para que buscador y botón queden alineados bajo el título */
+  justify-content: flex-start;
 }
 
-/* Contenedor de tarjetas */
-
-
-
-.header h2 {
-  color: #0056d6;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.controls input {
+.bodega-controls input {
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 14px;
 }
 
+/* Botón agregar bodega */
 #addBodegaBtn {
   background-color: #007bff;
   border: none;
@@ -81,6 +74,7 @@
   background-color: #0056b3;
 }
 
+/* TARJETAS */
 .bodega-card {
   background: white;
   border-radius: 10px;
@@ -106,10 +100,7 @@
   font-weight: bold;
 }
 
-.bodega-card p {
-  margin: 6px 0;
-}
-
+/* PROGRESS BAR */
 .progress {
   background-color: #e0e0e0;
   border-radius: 5px;
@@ -124,6 +115,7 @@
   width: 0%;
 }
 
+/* BOTONES */
 .actions {
   margin-top: 10px;
   display: flex;
@@ -147,8 +139,12 @@
   background-color: #dc3545;
 }
 
-.modal {
-  display: none; /* oculto por defecto */
+/* =================================== */
+/*      MODAL EXCLUSIVO DE BODEGAS     */
+/* =================================== */
+
+.bodega-modal {
+  display: none;
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.5);
@@ -157,7 +153,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.bodega-modal-content {
   background: white;
   border-radius: 12px;
   padding: 25px;
@@ -166,14 +162,14 @@
   animation: slideDown 0.3s ease-out;
 }
 
-.modal-actions {
+.bodega-modal-actions {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
 }
 
-.modal-actions button {
+.bodega-modal-actions button {
   padding: 8px 14px;
   border-radius: 6px;
   border: none;
@@ -204,4 +200,3 @@
   from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
-

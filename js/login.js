@@ -28,11 +28,6 @@ window.login = async function () {
     if (response.ok) {
       const user = await response.json();
 
-      if (user.rol !== "ADMIN") {
-        document.getElementById('login-status').innerText = "Acceso denegado. Solo administradores.";
-        return;
-      }
-
       sessionStorage.setItem("userData", JSON.stringify(user));
       document.getElementById('login-status').innerText = "Inicio de sesión exitoso.";
 
