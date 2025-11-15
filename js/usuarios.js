@@ -4,7 +4,7 @@ export function initUsuarios() {
   
   if (!isAdmin) {
     alert("Solo los administradores pueden acceder a esta sección");
-    window.location.href = "/dashboard";
+    window.location.href = "/index.html";
     return;
   }
   

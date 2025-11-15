@@ -10,7 +10,7 @@
   overflow-y: auto;
   padding-right: 5px;
   scrollbar-width: thin;
-  scrollbar-color: #007bff transparent;
+  scrollbar-color:  #6d40c2 transparent;
 }
 
 .bodegas-container::-webkit-scrollbar {
@@ -22,7 +22,7 @@
 }
 
 .bodegas-container::-webkit-scrollbar-thumb {
-  background-color: #007bff;
+  background-color: #6d40c2;
   border-radius: 3px;
 }
 
@@ -37,7 +37,7 @@
 
 .bodega-header h2 {
   margin: 0 0 10px 0;
-  color: #0056d6;
+  color: #6d40c2;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -60,7 +60,7 @@
 
 /* Botón agregar bodega */
 #addBodegaBtn {
-  background-color: #007bff;
+  background-color: #6d40c2;
   border: none;
   color: white;
   padding: 8px 14px;
@@ -89,7 +89,7 @@
 }
 
 .bodega-card h3 {
-  color: #007bff;
+  color: #447ab4;
   margin-top: 0;
 }
 
@@ -200,3 +200,5 @@
   from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+

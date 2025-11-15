@@ -17,7 +17,7 @@
 .dashboard-card {
   width: 400px;
   height: 150px;
-  border-left: 5px solid #195366;
+  border-left: 5px solid #431966;
   border-radius: 20px;
   padding: 10px;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
@@ -107,7 +107,7 @@
 
 /* BOTONES DE ACCIÓN */
 .dashboard-btn-detalles {
-  background: #28a745;
+  background: #5528a7;
   color: white;
   border: none;
   border-radius: 5px;
@@ -124,7 +124,7 @@
 }
 
 .dashboard-btn-editar {
-  background: #007bff;
+  background: #bcbe1a;
   color: white;
   border: none;
   border-radius: 5px;
