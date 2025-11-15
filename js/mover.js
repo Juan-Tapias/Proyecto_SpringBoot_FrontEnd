@@ -1,6 +1,5 @@
 import { cargarBodegas } from './bodega.js';
-import { obtenerProductos } from './inventario.js';
-
+import { cargarProductos, cargarProductosPorBodegas } from './inventario.js'; 
 let productosSeleccionados = [];
 let bodegasDisponibles = [];
 let todosLosProductos = [];
@@ -8,16 +7,25 @@ let todosLosProductos = [];
 export async function initMover() {
   console.log('🔄 Inicializando módulo de mover...');
   const userData = JSON.parse(sessionStorage.getItem("userData"));
+
   if (!userData?.rol) {
     console.error('❌ No se encontró usuario en sesión');
     return;
   }
 
+  const isAdmin = userData.rol === "ADMIN";
+
   bodegasDisponibles = await cargarBodegas(userData);
-  console.log(bodegasDisponibles);
-  
-  todosLosProductos = await obtenerProductos(userData.rol);
-  renderProductos(todosLosProductos);
+  console.log('Bodegas disponibles:', bodegasDisponibles);
+
+  if (isAdmin) {
+    todosLosProductos = await cargarProductos(userData.rol);
+  } else {
+    todosLosProductos = await cargarProductosPorBodegas(userData);
+  }
+  console.log('Productos cargados:', todosLosProductos);
+
+  renderProductos(todosLosProductos, userData.rol);
 
   const buscarInput = document.getElementById('mover-buscar-producto');
   if (buscarInput) {
@@ -35,29 +43,40 @@ function buscarProductos(termino) {
   renderProductos(productosFiltrados);
 }
 
-function renderProductos(productos = todosLosProductos) {
+function renderProductos(productos, rol) {
   const cont = document.getElementById("mover-productos-container");
   if (!cont) return;
 
+  cont.innerHTML = "";
   if (productos.length === 0) {
     cont.innerHTML = '<p class="mover-no-data">No se encontraron productos</p>';
     return;
   }
+  productos.forEach(prod => {
+    const card = document.createElement("div");
+    card.className = "mover-producto-card";
+    card.dataset.productoId = prod.id;
 
-  cont.innerHTML = productos.map(prod => `
-    <div class="mover-producto-card" data-producto-id="${prod.id}">
+    card.innerHTML = `
       <h4>${prod.nombre}</h4>
       <p><b>Categoría:</b> ${prod.categoria}</p>
       <p><b>Precio:</b> $${prod.precio}</p>
       <p><b>Stock:</b> ${prod.stock} disponibles</p>
+      ${rol !== "ADMIN" ? `<p><b>Bodega:</b> ${prod.bodega}</p>` : ""}
       <button class="mover-btn-agregar">➕ Agregar al movimiento</button>
-    </div>
-  `).join('');
+    `;
+
+    cont.appendChild(card);
+  });
 
   cont.querySelectorAll('.mover-producto-card').forEach(card => {
     const btn = card.querySelector('.mover-btn-agregar');
-    const productoId = parseInt(card.dataset.productoId);
-    btn.addEventListener('click', () => agregarProducto(productoId));
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const productoId = parseInt(card.dataset.productoId, 10);
+        agregarProducto(productoId);
+      });
+    }
   });
 }
 
@@ -66,7 +85,7 @@ function agregarProducto(productoId) {
   if (!producto) return;
   const existente = productosSeleccionados.find(p => p.id === productoId);
   if (existente) {
-    existente.cantidad += 1;
+    existente.cantidad = Math.min(existente.cantidad + 1, producto.stock);
   } else {
     productosSeleccionados.push({
       id: producto.id,
@@ -117,8 +136,8 @@ function agregarEventListenersControles() {
   if (!cont) return;
 
   cont.querySelectorAll('.mover-btn-decrementar').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const productoId = parseInt(e.target.dataset.id);
+    btn.addEventListener('click', e => {
+      const productoId = parseInt(e.target.dataset.id, 10);
       const producto = productosSeleccionados.find(p => p.id === productoId);
       if (producto && producto.cantidad > 1) {
         producto.cantidad -= 1;
@@ -128,8 +147,8 @@ function agregarEventListenersControles() {
   });
 
   cont.querySelectorAll('.mover-btn-incrementar').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const productoId = parseInt(e.target.dataset.id);
+    btn.addEventListener('click', e => {
+      const productoId = parseInt(e.target.dataset.id, 10);
       const producto = productosSeleccionados.find(p => p.id === productoId);
       if (producto && producto.cantidad < producto.stock) {
         producto.cantidad += 1;
@@ -139,21 +158,20 @@ function agregarEventListenersControles() {
   });
 
   cont.querySelectorAll('.mover-input-cantidad').forEach(input => {
-    input.addEventListener('change', (e) => {
-      const productoId = parseInt(e.target.dataset.id);
-      const nuevaCantidad = parseInt(e.target.value);
+    input.addEventListener('change', e => {
+      const productoId = parseInt(e.target.dataset.id, 10);
+      const nuevaCantidad = parseInt(e.target.value, 10);
       const producto = productosSeleccionados.find(p => p.id === productoId);
       if (producto) {
-        const cantidadFinal = Math.max(1, Math.min(nuevaCantidad, producto.stock));
-        producto.cantidad = cantidadFinal;
+        producto.cantidad = Math.min(Math.max(1, nuevaCantidad), producto.stock);
         actualizarListaSeleccionados();
       }
     });
   });
 
   cont.querySelectorAll('.mover-btn-eliminar').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const productoId = parseInt(e.target.dataset.id);
+    btn.addEventListener('click', e => {
+      const productoId = parseInt(e.target.dataset.id, 10);
       productosSeleccionados = productosSeleccionados.filter(p => p.id !== productoId);
       actualizarListaSeleccionados();
     });
@@ -176,6 +194,7 @@ function mostrarModalBodegas() {
     crearModal();
     modal = document.getElementById("mover-modal-bodegas");
   }
+
   const resumenLista = document.getElementById("mover-resumen-lista");
   if (resumenLista) {
     resumenLista.innerHTML = productosSeleccionados.map(p =>
@@ -185,8 +204,8 @@ function mostrarModalBodegas() {
 
   modal.classList.remove("hidden");
 }
+
 function crearModal() {
-  console.log("Entre")
   const existingModal = document.getElementById("mover-modal-bodegas");
   if (existingModal) {
     existingModal.remove();
@@ -229,11 +248,7 @@ function crearModal() {
         </div>
         <div class="mover-resumen-productos">
           <h4>📋 Resumen de Productos:</h4>
-          <div id="mover-resumen-lista">
-            ${productosSeleccionados.map(p => 
-              `<div class="mover-resumen-item">${p.nombre} - Cantidad: ${p.cantidad}</div>`
-            ).join('')}
-          </div>
+          <div id="mover-resumen-lista"></div>
         </div>
         <div class="mover-form-actions">
           <button type="submit" class="mover-btn-primary">✅ Crear Movimiento</button>
@@ -242,7 +257,6 @@ function crearModal() {
       </form>
     </div>
   `;
-  console.log(bodegasDisponibles.map(b => b.nombre))
 
   document.body.appendChild(modal);
   configurarEventListenersModal(modal);
@@ -261,7 +275,7 @@ function configurarEventListenersModal(modal) {
     const tipo = this.value;
     const origenGroup = document.getElementById('mover-group-origen');
     const destinoGroup = document.getElementById('mover-group-destino');
-    
+
     if (tipo === 'ENTRADA') {
       origenGroup.style.display = 'none';
       destinoGroup.style.display = 'block';
@@ -280,51 +294,61 @@ function configurarEventListenersModal(modal) {
 async function crearMovimiento(e) {
   e.preventDefault();
   const userData = JSON.parse(sessionStorage.getItem("userData"));
+
+  const baseApiUrl =
+    userData.rol === "ADMIN"
+      ? "http://localhost:8080/api/admin/movimientos"
+      : "http://localhost:8080/api/empleado/movimientos";
+
   const tipo = document.getElementById("mover-tipo-movimiento").value;
   const origen = document.getElementById("mover-bodega-origen").value;
   const destino = document.getElementById("mover-bodega-destino").value;
   const comentario = document.getElementById("mover-comentario").value;
 
   if (!tipo) return alert("❌ Selecciona tipo de movimiento");
-  if (tipo === 'TRASLADO' && (!origen || !destino)) return alert("❌ Para traslados necesitas ambas bodegas");
-  if (tipo === 'ENTRADA' && !destino) return alert("❌ Para entradas necesitas bodega destino");
-  if (tipo === 'SALIDA' && !origen) return alert("❌ Para salidas necesitas bodega origen");
+  if (tipo === "TRASLADO" && (!origen || !destino))
+    return alert("❌ Para traslados necesitas ambas bodegas");
+  if (tipo === "ENTRADA" && !destino) return alert("❌ Para entradas necesitas bodega destino");
+  if (tipo === "SALIDA" && !origen) return alert("❌ Para salidas necesitas bodega origen");
 
   try {
     const payload = {
       usuarioId: userData.id,
       tipoMovimiento: tipo,
       comentario: comentario,
-      bodegaOrigenId: tipo === 'ENTRADA' ? 0 : parseInt(origen),
-      bodegaDestinoId: tipo === 'SALIDA' ? 0 : parseInt(destino),
+      bodegaOrigenId: tipo === "ENTRADA" ? 0 : parseInt(origen, 10),
+      bodegaDestinoId: tipo === "SALIDA" ? 0 : parseInt(destino, 10),
       fecha: new Date().toISOString(),
-      detalles: productosSeleccionados.map(p => ({
+      detalles: productosSeleccionados.map((p) => ({
         productoId: p.id,
-        cantidad: p.cantidad
-      }))
+        cantidad: p.cantidad,
+      })),
     };
 
     console.log("📦 Enviando movimiento:", payload);
 
-    const response = await fetch(`http://localhost:8080/api/admin/movimientos?usuarioId=${userData.id}`, {
+    const response = await fetch(`${baseApiUrl}?usuarioId=${userData.id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${userData.token}`
+        Authorization: `Bearer ${userData.token}`,
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) throw new Error(await response.text());
 
     alert("✅ Movimiento creado correctamente");
     document.getElementById("mover-modal-bodegas").classList.add("hidden");
+
     productosSeleccionados = [];
     actualizarListaSeleccionados();
-    
-    todosLosProductos = await obtenerProductos(userData.rol);
-    renderProductos(todosLosProductos);
 
+    todosLosProductos = userData.rol === "ADMIN"
+      ? await cargarProductos(userData.rol)
+      : await cargarProductosPorBodegas(userData);
+
+    renderProductos(todosLosProductos, userData.rol);
   } catch (error) {
     console.error("❌ Error al crear movimiento:", error);
     alert(`Error al crear movimiento: ${error.message}`);

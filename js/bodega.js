@@ -3,7 +3,7 @@ export function initBodegas() {
   const isAdmin = userData?.rol === "ADMIN";
   const bodegasBaseUrl = isAdmin
     ? `http://localhost:8080/api/admin/bodegas?usuarioId=${userData.id}`
-    : `http://localhost:8080/api/empleado/bodegas?usuarioId=${userData.id}`;
+    : `http://localhost:8080/api/empleado/bodegas/encargado?usuarioId=${userData.id}`;
   
   const container = document.getElementById("bodegasContainer");
   const addBtn = document.getElementById("addBodegaBtn");

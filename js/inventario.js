@@ -1,24 +1,19 @@
 export async function initProductos() {
-  console.log('🔄 Inicializando módulo de productos...');
-
   const userData = JSON.parse(sessionStorage.getItem("userData"));
   const rol = userData?.rol;
+  let productos = [];
 
-  if (!rol) {
-    console.error('❌ No se encontró el rol en sessionStorage');
-    return;
+  if (rol === "ADMIN") {
+    productos = await cargarProductos("ADMIN");
+  } else {
+    productos = await cargarProductosPorBodegas(userData);
   }
 
-  await cargarProductos(rol);
+  renderAgregarProductoCard(rol);
+  renderProductos(productos, rol);
   agregarEventListeners(rol);
 }
 
-function agregarEventListeners(rol) {
-  const btnAgregar = document.getElementById('btn-agregar-producto');
-  if (btnAgregar) {
-    btnAgregar.addEventListener('click', () => mostrarVentanaAgregar(rol));
-  }
-}
 
 export async function cargarProductos(rol) {
   try {
@@ -27,60 +22,70 @@ export async function cargarProductos(rol) {
     const userData = JSON.parse(sessionStorage.getItem("userData"));
     const token = userData?.token;
 
-    const url = rol === "ADMIN"
-      ? "http://localhost:8080/api/admin/productos"
-      : "http://localhost:8080/api/empleado/productos";
+    let productos = [];
 
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    if (rol === "ADMIN") {
+      const response = await fetch("http://localhost:8080/api/admin/productos", {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-    if (!response.ok) {
-      throw new Error(`Error ${response.status}: ${await response.text()}`);
-    }
-
-    const productos = await response.json();
-    const cont = document.getElementById("producto-data");
-    if (!cont) return;
-
-    cont.innerHTML = "";
-
-    renderAgregarProductoCard(rol);
-
-
-    if (!productos || productos.length === 0) {
-      cont.innerHTML = "<p class='no-data'>No hay productos registrados</p>";
-      return;
-    }
-
-    productos.forEach(prod => {
-      const card = document.createElement("div");
-      card.className = "producto-card";
-
-      card.innerHTML = `
-        <h4>${prod.nombre}</h4>
-        <p><b>${prod.categoria}</b></p>
-        <p><b>$${prod.precio}</b></p>
-        <p><b>${prod.stock} disponibles</b></p>
-      `;
-
-      if (rol === "ADMIN") {
-        card.style.cursor = "pointer";
-        card.addEventListener("click", () => mostrarVentanaEditar(prod, rol));
+      if (!response.ok) {
+        throw new Error(await response.text());
       }
 
-      cont.appendChild(card);
-    });
+      productos = await response.json();
+
+    } else {
+      const bodegasResp = await fetch(
+        `http://localhost:8080/api/empleado/bodegas/encargado?usuarioId=${userData.id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!bodegasResp.ok) throw new Error(await bodegasResp.text());
+      const bodegas = await bodegasResp.json();
+
+      productos = [];
+
+      for (const bodega of bodegas) {
+        const respProd = await fetch(
+          `http://localhost:8080/api/empleado/bodegas/${bodega.id}/productos`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (!respProd.ok) continue;
+
+        const prods = await respProd.json();
+
+        prods.forEach(p => {
+          p.bodega = bodega.nombre;
+        });
+
+        productos.push(...prods);
+      }
+    }
+
+    return productos;  
 
   } catch (error) {
     console.error("❌ Error al cargar productos:", error);
-    const cont = document.getElementById("producto-data");
-    if (cont) cont.innerHTML = "<p class='error-message'>Error al cargar los productos</p>";
+    return [];
   }
 }
+
+
 
 
 async function eliminarProducto(productoId, rol) {
@@ -112,7 +117,8 @@ async function eliminarProducto(productoId, rol) {
 
     alert("Producto eliminado correctamente");
     document.getElementById("modal-editar").classList.add("hidden");
-    await cargarProductos(rol);
+    const productos = await cargarProductos(rol);
+    renderProductos(productos, rol);
 
   } catch (err) {
     console.error("❌ Error eliminando:", err);
@@ -199,7 +205,8 @@ async function guardarCambiosProducto(productoActual, datosActualizados, rol) {
 
     alert("Producto actualizado");
     document.getElementById("modal-editar").classList.add("hidden");
-    await cargarProductos(rol);
+    const productos = await cargarProductos(rol);
+    renderProductos(productos, rol);
 
   } catch (err) {
     console.error("❌ Error actualizando:", err);
@@ -246,29 +253,37 @@ function mostrarVentanaAgregar(rol) {
       usuarioId: usuarioId
     };
 
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/admin/productos?usuarioId=${usuarioId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${userData.token}`
-          },
-          body: JSON.stringify(nuevoProducto)
-        }
-      );
+    const endpoint = rol === "ADMIN"
+      ? `http://localhost:8080/api/admin/productos?usuarioId=${usuarioId}`
+      : `http://localhost:8080/api/empleado/productos/crear?usuarioId=${usuarioId}`;
 
-      if (!response.ok) throw new Error(await response.text());
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${userData.token}`
+        },
+        body: JSON.stringify(nuevoProducto)
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("📌 Respuesta del backend:", text);
+        throw new Error(text);
+      }
+
       alert("Producto agregado correctamente");
       modal.classList.add("hidden");
-      await cargarProductos(rol);
-
+      const productos = await cargarProductos(rol);
+      renderProductos(productos, rol);
     } catch (err) {
       console.error("❌ Error agregando:", err);
-      alert("Error al agregar el producto");
+      alert("Error al agregar el producto: " + err.message);
     }
   };
 }
+
 function renderAgregarProductoCard(rol) {
   const cont = document.getElementById("producto-data");
   if (!cont) return;
@@ -290,31 +305,107 @@ function renderAgregarProductoCard(rol) {
   cont.prepend(card);
 }
 
-export async function obtenerProductos(rol) {
+export async function cargarProductosPorBodegas(userData) {
   try {
-    console.log('📦 Obteniendo productos para mover...');
-    const userData = JSON.parse(sessionStorage.getItem("userData"));
-    const token = userData?.token;
-    const url = rol === "ADMIN"
-      ? "http://localhost:8080/api/admin/productos"
-      : "http://localhost:8080/api/empleado/productos";
-
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error ${response.status}: ${await response.text()}`);
+    if (!userData || !userData.rol || !userData.id) {
+      console.error('❌ Datos de usuario incompletos');
+      return [];
     }
 
-    const productos = await response.json();
-    return productos || [];
+    if (userData.rol === "ADMIN") {
+      return [];
+    }
+
+    const urlBodegas = `http://localhost:8080/api/empleado/bodegas/encargado?usuarioId=${userData.id}`;
+    const resBodegas = await fetch(urlBodegas, {
+      headers: { 'Authorization': `Bearer ${userData.token}` }
+    });
+
+    if (!resBodegas.ok) throw new Error(`Error ${resBodegas.status}: ${await resBodegas.text()}`);
+
+    const bodegas = await resBodegas.json();
+    
+    let productosTotales = [];
+
+    for (const bodega of bodegas) {
+      const urlProductos = `http://localhost:8080/api/empleado/bodegas/${bodega.id}/productos`;
+      const resProductos = await fetch(urlProductos, {
+        headers: { 'Authorization': `Bearer ${userData.token}` }
+      });
+
+      if (!resProductos.ok) {
+        console.error(`Error al cargar productos de bodega ${bodega.nombre}`);
+        continue;
+      }
+
+      const productosBodega = await resProductos.json();
+
+      const productosMapeados = productosBodega.map(item => ({
+        id: item.productoId,
+        nombre: item.nombre,
+        categoria: item.categoria,
+        stock: item.stock,
+        precio: item.precio ?? 0,
+        bodega: bodega.nombre           
+      }));
+
+      productosTotales.push(...productosMapeados);
+    }
+
+    return productosTotales;
 
   } catch (error) {
-    console.error("❌ Error al obtener productos:", error);
+    console.error('❌ Error cargando productos por bodegas:', error);
     return [];
   }
+}
+
+function agregarEventListeners(rol) {
+  const btnAgregar = document.getElementById('btn-agregar-producto');
+  if (btnAgregar) {
+    btnAgregar.addEventListener('click', () => mostrarVentanaAgregar(rol));
+  }
+
+}
+
+
+function renderProductos(productos, rol) {
+  const cont = document.getElementById("producto-data");
+  if (!cont) return;
+
+  if (!Array.isArray(productos)) {
+    console.error("renderProductos: No se recibió un array válido:", productos);
+    cont.innerHTML = "<p class='error-message'>Error cargando productos</p>";
+    return;
+  }
+
+  const cardAgregar = document.getElementById("card-agregar-producto");
+
+  cont.innerHTML = "";
+  if (cardAgregar) cont.appendChild(cardAgregar);
+
+  if (productos.length === 0) {
+    cont.innerHTML += "<p class='no-data'>No hay productos disponibles</p>";
+    return;
+  }
+
+  productos.forEach(prod => {
+    const card = document.createElement("div");
+    card.className = "producto-card";
+
+    card.innerHTML = `
+      <h4>${prod.nombre}</h4>
+      <p><b>${prod.categoria}</b></p>
+      <p><b>$${prod.precio}</b></p>
+      <p><b>${prod.stock} disponibles</b></p>
+      ${rol !== "ADMIN" ? `<p><b>Bodega:</b> ${prod.bodega}</p>` : ""}
+    `;
+
+    if (rol === "ADMIN") {
+      card.style.cursor = "pointer";
+      card.addEventListener("click", () => mostrarVentanaEditar(prod, rol));
+    }
+
+    cont.appendChild(card);
+  });
 }
