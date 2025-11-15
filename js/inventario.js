@@ -20,7 +20,7 @@ function agregarEventListeners(rol) {
   }
 }
 
-async function cargarProductos(rol) {
+export async function cargarProductos(rol) {
   try {
     console.log('📦 Cargando productos...');
 
@@ -282,12 +282,39 @@ function renderAgregarProductoCard(rol) {
 
   card.innerHTML = `
     <h4 style="color: var(--primary, #6c63ff)">+ Agregar producto</h4>
-    <p>Registro en la base de datos</p>
-    <p><b>Admin</b></p>
   `;
 
   card.style.cursor = "pointer";
   card.addEventListener("click", () => mostrarVentanaAgregar(rol));
 
   cont.prepend(card);
+}
+
+export async function obtenerProductos(rol) {
+  try {
+    console.log('📦 Obteniendo productos para mover...');
+    const userData = JSON.parse(sessionStorage.getItem("userData"));
+    const token = userData?.token;
+    const url = rol === "ADMIN"
+      ? "http://localhost:8080/api/admin/productos"
+      : "http://localhost:8080/api/empleado/productos";
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
+    }
+
+    const productos = await response.json();
+    return productos || [];
+
+  } catch (error) {
+    console.error("❌ Error al obtener productos:", error);
+    return [];
+  }
 }

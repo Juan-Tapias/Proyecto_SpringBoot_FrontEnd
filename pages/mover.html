@@ -1,0 +1,78 @@
+<!-- mover.html -->
+<h1>Crear Movimiento</h1>
+<hr>
+
+<section class="mover-contenedor-principal">
+    <div class="mover-productos-container">
+        <!-- Columna izquierda: Productos disponibles -->
+        <div class="mover-columna-productos">
+            <h2>📦 Productos Disponibles</h2>
+            <div class="mover-busqueda">
+                <input type="text" id="mover-buscar-producto" placeholder="🔍 Buscar producto..." class="mover-input-busqueda">
+            </div>
+            <div id="mover-productos-container" class="mover-grid-productos">
+                <!-- Los productos se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Columna derecha: Productos seleccionados -->
+        <div class="mover-columna-seleccionados">
+            <h2>🛒 Productos Seleccionados</h2>
+            <div id="mover-productos-seleccionados" class="mover-lista-seleccionados">
+                <div class="mover-lista-vacia">
+                    <p>No hay productos seleccionados</p>
+                    <small>Haz clic en "Agregar al movimiento" para seleccionar productos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="mover-modal-bodegas" class="mover-modal hidden">
+    <div class="mover-modal-content">
+        <span class="mover-close" id="mover-cerrar-modal">&times;</span>
+        <h3>📝 Completar Información del Movimiento</h3>
+        
+        <form id="mover-form-movimiento" class="mover-form">
+            <div class="mover-form-group">
+                <label for="mover-tipo-movimiento">📋 Tipo de Movimiento:</label>
+                <select id="mover-tipo-movimiento" required class="mover-select">
+                    <option value="">-- Seleccione tipo --</option>
+                    <option value="ENTRADA">📥 ENTRADA</option>
+                    <option value="SALIDA">📤 SALIDA</option>
+                    <option value="TRASLADO">🔄 TRASLADO</option>
+                </select>
+            </div>
+
+            <div class="mover-form-group" id="mover-group-origen">
+                <label for="mover-bodega-origen">🏭 Bodega Origen:</label>
+                <select id="mover-bodega-origen" class="mover-select">
+                    <option value="">-- Seleccione Bodega Origen --</option>
+                </select>
+            </div>
+
+            <div class="mover-form-group" id="mover-group-destino">
+                <label for="mover-bodega-destino">🏠 Bodega Destino:</label>
+                <select id="mover-bodega-destino" class="mover-select">
+                    <option value="">-- Seleccione Bodega Destino --</option>
+                </select>
+            </div>
+
+            <div class="mover-form-group">
+                <label for="mover-comentario">💬 Comentario:</label>
+                <textarea id="mover-comentario" rows="3" placeholder="Descripción del movimiento..." class="mover-textarea"></textarea>
+            </div>
+
+            <div class="mover-resumen-productos">
+                <h4>📋 Resumen de Productos:</h4>
+                <div id="mover-resumen-lista">
+                </div>
+            </div>
+
+            <div class="mover-form-actions">
+                <button type="submit" class="mover-btn-primary">✅ Crear Movimiento</button>
+                <button type="button" id="mover-btn-cancelar" class="mover-btn-secondary">❌ Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
