@@ -1,0 +1,38 @@
+<div class="container">
+  <header class="usuarios-header">
+    <h2>👥 <span>Gestión de Usuarios</span></h2>
+    <div class="usuarios-controls">
+      <input type="text" id="searchUsuariosInput" placeholder="Buscar usuario...">
+      <button id="addUsuarioBtn">+ Nuevo Usuario</button>
+    </div>
+  </header>
+
+  <section class="usuarios-table-container">
+    <table id="usuariosTable" class="usuarios-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Username</th>
+          <th>Rol</th>
+          <th>Bodegas</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="usuariosContainer">
+        <!-- Los usuarios se cargarán aquí -->
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<div id="usuario-modal" class="usuario-modal">
+  <div class="usuario-modal-content">
+    <h3 id="usuario-modal-title">Título</h3>
+    <div id="usuario-modal-body"></div>
+
+    <div class="usuario-modal-actions">
+      <button id="usuario-modal-cancel">Cancelar</button>
+      <button id="usuario-modal-ok">Guardar</button>
+    </div>
+  </div>
+</div>
