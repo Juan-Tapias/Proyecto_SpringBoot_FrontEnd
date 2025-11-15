@@ -119,7 +119,7 @@ export function initUsuarios() {
             <button class="edit-usuario-btn" data-id="${usuario.id}" title="Editar usuario">
               Editar
             </button>
-            <button class="delete-usuario-btn" data-id="${usuario.id}" title="Eliminar usuario">
+            <button class="delete-usuario-btn" data-username="${usuario.username}" title="Eliminar usuario">
               Eliminar
             </button>
           </div>
@@ -145,12 +145,12 @@ export function initUsuarios() {
 
     document.querySelectorAll(".delete-usuario-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
-        const usuarioId = e.target.getAttribute("data-id");
-        console.log("🗑️ Eliminando usuario ID:", usuarioId);
-        if (usuarioId) {
-          eliminarUsuario(usuarioId);
+        const username = e.target.getAttribute("data-username");
+        console.log("🗑️ Eliminando usuario username:", username);
+        if (username) {
+          eliminarUsuario(username);
         } else {
-          console.error("❌ ID de usuario no encontrado");
+          console.error("❌ Username de usuario no encontrado");
           alert("Error: No se pudo identificar el usuario a eliminar");
         }
       });
@@ -218,6 +218,7 @@ export function initUsuarios() {
           
           console.log("📤 Editando usuario ID:", usuario.id, "Datos:", requestBody);
           
+          // PUT usa ID
           const url = `${usuariosBaseUrl}/${usuario.id}`;
           console.log("🔗 URL:", url);
           
@@ -239,8 +240,14 @@ export function initUsuarios() {
             return;
           }
           
-          const usuarioEditado = await res.json();
-          console.log("✅ Usuario editado:", usuarioEditado);
+          // Intentar obtener la respuesta como JSON
+          let usuarioEditado;
+          try {
+            usuarioEditado = await res.json();
+            console.log("✅ Usuario editado:", usuarioEditado);
+          } catch (jsonError) {
+            console.log("⚠️  Respuesta sin cuerpo JSON, solo status:", res.status);
+          }
           
           alert("✅ Usuario editado correctamente");
           cargarUsuarios(); // Recargar la lista
@@ -253,11 +260,11 @@ export function initUsuarios() {
     );
   }
   
-  async function eliminarUsuario(id) {
-    console.log("🗑️ Eliminando usuario ID:", id);
+  async function eliminarUsuario(username) {
+    console.log("🗑️ Eliminando usuario username:", username);
     
-    if (!id) {
-      console.error("❌ ID de usuario es undefined");
+    if (!username) {
+      console.error("❌ Username de usuario es undefined");
       alert("Error: No se pudo identificar el usuario a eliminar");
       return;
     }
@@ -265,7 +272,8 @@ export function initUsuarios() {
     if (!confirm("¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.")) return;
     
     try {
-      const url = `${usuariosBaseUrl}/${id}`;
+      // DELETE usa username
+      const url = `${usuariosBaseUrl}/${username}`;
       console.log("🔗 URL de eliminación:", url);
       
       const res = await fetch(url, {
@@ -357,8 +365,13 @@ export function initUsuarios() {
             return;
           }
           
-          const nuevoUsuario = await res.json();
-          console.log("✅ Usuario creado:", nuevoUsuario);
+          let nuevoUsuario;
+          try {
+            nuevoUsuario = await res.json();
+            console.log("✅ Usuario creado:", nuevoUsuario);
+          } catch (jsonError) {
+            console.log("⚠️  Respuesta sin cuerpo JSON, solo status:", res.status);
+          }
           
           alert("✅ Usuario creado correctamente");
           cargarUsuarios();

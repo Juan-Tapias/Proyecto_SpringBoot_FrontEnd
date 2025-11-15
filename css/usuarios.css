@@ -2,8 +2,16 @@
 /*   ESTILOS EXCLUSIVOS DE USUARIOS    */
 /* =================================== */
 
+.usuario-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .usuarios-table-container {
-  flex: 1 1 auto;
+  flex: 1;
+  margin-top: 15px;     /* Separación del header */
+  overflow-y: auto;
   overflow-y: auto;
   background: white;
   border-radius: 10px;
