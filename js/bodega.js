@@ -323,3 +323,38 @@ async function cargarBodegas() {
     );
   }
 }
+
+export async function cargarBodegas(userData) {
+  try {
+    const isAdmin = userData?.rol === "ADMIN";
+    const url = isAdmin
+      ? `http://localhost:8080/api/admin/bodegas?usuarioId=${userData.id}`
+      : `http://localhost:8080/api/empleado/bodegas?usuarioId=${userData.id}`;
+
+    console.log("🔍 Cargando bodegas desde:", url);
+    
+    const res = await fetch(url, {
+      headers: { 
+        "Authorization": `Bearer ${userData.token}`,
+        "Content-Type": "application/json"
+      }
+    });
+    
+    console.log("📊 Response status:", res.status);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("❌ Error response:", errorText);
+      throw new Error(`HTTP ${res.status}: ${errorText}`);
+    }
+    
+    const bodegas = await res.json();
+    console.log("✅ Bodegas cargadas:", bodegas.length);
+    
+    return bodegas;
+    
+  } catch (err) {
+    console.error("❌ Error al cargar bodegas", err);
+    throw err;
+  }
+}

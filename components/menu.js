@@ -6,6 +6,7 @@ export function renderSidebarMenu(targetSelector = 'body') {
       <p>Sistema de Gestión de Bodegas</p>
     </div>
     <ul class="menu">
+      <li class="menu-item" data-target="mover"><i>📊</i> Mover</li>
       <li class="menu-item" data-target="dashboard"><i>📊</i> Dashboard</li>
       <li class="menu-item" data-target="bodegas"><i>🏭</i> Gestión de Bodegas</li>
       <li class="menu-item" data-target="productos"><i>📦</i> Inventario</li>
@@ -28,6 +29,10 @@ export function renderSidebarMenu(targetSelector = 'body') {
 async function cargarSeccion(target) {
   const main = document.getElementById('main-content');
   const secciones = {
+    mover: { 
+      html: '/pages/mover.html',
+      js: '/js/mover.js'
+    },
     dashboard: { 
       html: '/pages/dashboard.html',
       js: '/js/dashboard.js'
@@ -77,6 +82,7 @@ async function cargarJavaScript(jsUrl, seccion) {
     const module = await import(jsUrl);
     
     const initFunctions = {
+      mover: () => module.initMover?.(),
       dashboard: () => module.initDashboard?.(),
       bodegas: () => module.initBodegas?.(),
       productos: () => module.initProductos?.(),
