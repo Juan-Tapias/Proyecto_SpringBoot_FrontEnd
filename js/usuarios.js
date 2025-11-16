@@ -110,11 +110,6 @@ export function initUsuarios() {
           </span>
         </td>
         <td>
-          <span class="bodegas-count" title="Bodegas a cargo">
-            ${usuario.cantidadBodegas || 0}
-          </span>
-        </td>
-        <td>
           <div class="usuario-actions">
             <button class="edit-usuario-btn" data-id="${usuario.id}" title="Editar usuario">
               Editar
