@@ -1,6 +1,5 @@
 export function renderSidebarMenu(targetSelector = 'body') {
   const userData = JSON.parse(sessionStorage.getItem("userData"));
-  
   const isAdmin = userData?.rol === 'ADMIN';
 
   const html = `
@@ -18,8 +17,13 @@ export function renderSidebarMenu(targetSelector = 'body') {
     </ul>
   </div>
 
+  <!-- Overlay para móvil -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
   <header class="app-header">
     <div class="header-left">
+      <!-- Botón hamburguesa -->
+      <button class="menu-toggle" id="menuToggle">☰</button>
       <div class="header-title" id="current-section-title">Dashboard</div>
     </div>
     <div class="header-right">
@@ -48,14 +52,62 @@ export function renderSidebarMenu(targetSelector = 'body') {
   const container = document.querySelector(targetSelector);
   if (container) container.insertAdjacentHTML('afterbegin', html);
 
+  // Configurar el menú hamburguesa
+  setupMobileMenu();
+
+  // Configurar eventos del menú
   document.querySelectorAll('.menu-item').forEach(item => {
     item.addEventListener('click', () => {
       const target = item.dataset.target;
       cargarSeccion(target);
+      
+      // Cerrar menú en móvil al seleccionar una opción
+      if (window.innerWidth <= 992) {
+        closeMobileMenu();
+      }
     });
   });
 
   setupUserDropdown();
+}
+
+// Función para configurar el menú móvil
+function setupMobileMenu() {
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.querySelector('.sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  
+  if (menuToggle && sidebar && sidebarOverlay) {
+    menuToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      sidebar.classList.toggle('mobile-open');
+      sidebarOverlay.classList.toggle('mobile-open');
+    });
+    
+    sidebarOverlay.addEventListener('click', closeMobileMenu);
+    
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', function(e) {
+      if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+        closeMobileMenu();
+      }
+    });
+    
+    // Cerrar menú al redimensionar la ventana a desktop
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 992) {
+        closeMobileMenu();
+      }
+    });
+  }
+}
+
+function closeMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  
+  if (sidebar) sidebar.classList.remove('mobile-open');
+  if (sidebarOverlay) sidebarOverlay.classList.remove('mobile-open');
 }
 
 function setupUserDropdown() {
@@ -68,6 +120,7 @@ function setupUserDropdown() {
       menu.classList.toggle('show');
     });
 
+    // Cerrar dropdown al hacer clic fuera
     document.addEventListener('click', () => {
       menu.classList.remove('show');
     });
@@ -84,7 +137,6 @@ window.cerrarSesion = function() {
 };
 
 async function cargarSeccion(target) {
-
   const userData = JSON.parse(sessionStorage.getItem("userData"));
   const isAdmin = userData?.rol === "ADMIN";
   
@@ -184,6 +236,7 @@ function actualizarMenuActivo(seccionActiva) {
   });
 }
 
+// Cargar dashboard por defecto al iniciar
 document.addEventListener('DOMContentLoaded', () => {
   cargarSeccion('dashboard');
 });
