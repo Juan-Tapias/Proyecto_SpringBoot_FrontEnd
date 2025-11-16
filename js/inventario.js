@@ -3,22 +3,21 @@ import { cargarBodegas } from './bodega.js';
 let bodegasEmpleado = []
 let bodegasAdmin = []
 let productosActuales = [];
-
 let isAdmin;
 
 export async function initProductos() {
   const userData = JSON.parse(sessionStorage.getItem("userData"));
-  const isAdmin = userData?.rol === "ADMIN";
-
-  let productos = [];
+  isAdmin = userData?.rol === "ADMIN";
 
   if (isAdmin) {
-    productos = await cargarProductos("ADMIN");
+    productosActuales = await cargarProductos("ADMIN");
     bodegasAdmin = await cargarBodegas(userData);
   } else {
     bodegasEmpleado = await cargarBodegas(userData);
-    productos = await cargarProductosPorBodegas(userData);
+    productosActuales = await cargarProductosPorBodegas(userData);
   }
+
+  console.log("📦 Productos cargados:", productosActuales.length);
 
   cargarProductosFiltrados('todos');
 
@@ -37,11 +36,9 @@ export async function initProductos() {
   }
 
   renderAgregarProductoCard(isAdmin);
-  renderProductos(productos, isAdmin);
+  renderProductos(productosActuales, isAdmin);
   agregarEventListeners(isAdmin);
 }
-
-
 
 export async function cargarProductos(rol) {
   try {
@@ -99,12 +96,14 @@ export async function cargarProductos(rol) {
 
         prods.forEach(p => {
           p.bodega = bodega.nombre;
+          p.bodegaId = bodega.id; // 🔥 Guardar ID de bodega para empleados
         });
 
         productos.push(...prods);
       }
     }
 
+    console.log("✅ Productos cargados exitosamente:", productos.length);
     return productos;  
 
   } catch (error) {
@@ -112,9 +111,6 @@ export async function cargarProductos(rol) {
     return [];
   }
 }
-
-
-
 
 async function eliminarProducto(productoId, rol) {
   if (!confirm(`¿Eliminar el producto #${productoId}?`)) return;
@@ -145,8 +141,15 @@ async function eliminarProducto(productoId, rol) {
 
     alert("Producto eliminado correctamente");
     document.getElementById("modal-editar").classList.add("hidden");
-    const productos = await cargarProductos(rol);
-    renderProductos(productos, rol);
+    
+    // Recargar productos y actualizar productosActuales
+    if (isAdmin) {
+      productosActuales = await cargarProductos("ADMIN");
+    } else {
+      productosActuales = await cargarProductosPorBodegas(userData);
+    }
+    
+    renderProductos(productosActuales, rol);
 
   } catch (err) {
     console.error("❌ Error eliminando:", err);
@@ -154,12 +157,8 @@ async function eliminarProducto(productoId, rol) {
   }
 }
 
-
-
 function mostrarVentanaEditar(producto, rol) {
-
-  console.log("Entre");
-  
+  console.log("📝 Editando producto:", producto);
 
   const modal = document.getElementById("modal-editar");
   if (!modal) return;
@@ -201,9 +200,6 @@ function mostrarVentanaEditar(producto, rol) {
   }
 
   btnEliminar.onclick = () => eliminarProducto(producto.id, rol);
-
-  console.log("Sali");
-  
 }
 
 async function guardarCambiosProducto(productoActual, datosActualizados, rol) {
@@ -220,6 +216,11 @@ async function guardarCambiosProducto(productoActual, datosActualizados, rol) {
       usuarioId: userData.id
     };
 
+    // 🔥 Para empleados, asegurarnos de incluir bodegaId si existe
+    if (rol !== "ADMIN" && productoActual.bodegaId) {
+      payload.bodegaId = productoActual.bodegaId;
+    }
+
     const response = await fetch(url, {
       method: "PUT",
       headers: {
@@ -233,8 +234,15 @@ async function guardarCambiosProducto(productoActual, datosActualizados, rol) {
 
     alert("Producto actualizado");
     document.getElementById("modal-editar").classList.add("hidden");
-    const productos = await cargarProductos(rol);
-    renderProductos(productos, rol);
+    
+    // Recargar productos y actualizar productosActuales
+    if (isAdmin) {
+      productosActuales = await cargarProductos("ADMIN");
+    } else {
+      productosActuales = await cargarProductosPorBodegas(userData);
+    }
+    
+    renderProductos(productosActuales, rol);
 
   } catch (err) {
     console.error("❌ Error actualizando:", err);
@@ -287,8 +295,6 @@ function mostrarVentanaAgregar(rol) {
       return;
     }
 
-    console.log(bodegaId)
-
     const nuevoProducto = {
       id: 0,
       nombre: document.getElementById("agregar-nombre").value,
@@ -299,8 +305,6 @@ function mostrarVentanaAgregar(rol) {
       usuarioId: usuarioId,
       bodegaId: bodegaId
     };
-
-
 
     const endpoint = rol === "ADMIN"
       ? `http://localhost:8080/api/admin/productos?usuarioId=${usuarioId}`
@@ -324,8 +328,15 @@ function mostrarVentanaAgregar(rol) {
 
       alert("Producto agregado correctamente");
       modal.classList.add("hidden");
-      const productos = await cargarProductos(rol);
-      renderProductos(productos, rol);
+      
+      // Recargar productos y actualizar productosActuales
+      if (isAdmin) {
+        productosActuales = await cargarProductos("ADMIN");
+      } else {
+        productosActuales = await cargarProductosPorBodegas(userData);
+      }
+      
+      renderProductos(productosActuales, rol);
     } catch (err) {
       console.error("❌ Error agregando:", err);
       alert("Error al agregar el producto: " + err.message);
@@ -340,6 +351,7 @@ function renderAgregarProductoCard(rol) {
   const prev = document.getElementById("card-agregar-producto");
   if (prev) prev.remove();
 
+  // 🔥 MOSTRAR BOTÓN DE AGREGAR TANTO PARA ADMIN COMO EMPLEADOS
   const card = document.createElement("div");
   card.className = "producto-card agregar-producto-card";
   card.id = "card-agregar-producto";
@@ -395,7 +407,8 @@ export async function cargarProductosPorBodegas(userData) {
         categoria: item.categoria,
         stock: item.stock,
         precio: item.precio ?? 0,
-        bodega: bodega.nombre           
+        bodega: bodega.nombre,
+        bodegaId: bodega.id // 🔥 Guardar ID de bodega
       }));
 
       productosTotales.push(...productosMapeados);
@@ -414,9 +427,7 @@ function agregarEventListeners(rol) {
   if (btnAgregar) {
     btnAgregar.addEventListener('click', () => mostrarVentanaAgregar(rol));
   }
-
 }
-
 
 function renderProductos(productos, rol) {
   const cont = document.getElementById("producto-data");
@@ -444,18 +455,77 @@ function renderProductos(productos, rol) {
 
     card.innerHTML = `
       <h4>${prod.nombre}</h4>
-      <p><b>${prod.categoria}</b></p>
-      <p><b>$${prod.precio}</b></p>
-      <p><b>${prod.stock} disponibles</b></p>
+      <p><b>Categoría:</b> ${prod.categoria}</p>
+      <p><b>Precio:</b> $${prod.precio}</p>
+      <p><b>Stock:</b> ${prod.stock} disponibles</p>
       ${rol !== "ADMIN" ? `<p><b>Bodega:</b> ${prod.bodega}</p>` : ""}
+      
+      <!-- 🔥 BOTONES DE ACCIÓN PARA EMPLEADOS -->
+      ${rol !== "ADMIN" ? `
+        <div class="producto-actions">
+          <button class="edit-producto-btn" data-id="${prod.id}" data-nombre="${prod.nombre}">
+            ✏️ Editar
+          </button>
+          <button class="delete-producto-btn" data-id="${prod.id}" data-nombre="${prod.nombre}">
+            🗑️ Eliminar
+          </button>
+        </div>
+      ` : ""}
     `;
 
+    // ADMIN: click en toda la card para editar
     if (rol === "ADMIN") {
       card.style.cursor = "pointer";
       card.addEventListener("click", () => mostrarVentanaEditar(prod, rol));
     }
 
     cont.appendChild(card);
+  });
+
+  // 🔥 AGREGAR EVENT LISTENERS PARA EMPLEADOS
+  if (rol !== "ADMIN") {
+    agregarEventListenersEmpleados();
+  }
+
+  console.log("📦 Productos renderizados:", productos.length);
+  console.log("🔍 productosActuales tiene:", productosActuales.length);
+}
+
+// 🔥 NUEVA FUNCIÓN PARA EVENT LISTENERS DE EMPLEADOS
+function agregarEventListenersEmpleados() {
+  // Event listeners para editar
+  document.querySelectorAll('.edit-producto-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation(); // Evitar que se propague el evento
+      const productoId = e.target.getAttribute('data-id');
+      const productoNombre = e.target.getAttribute('data-nombre');
+      
+      console.log("📝 Empleado editando producto:", productoId, productoNombre);
+      
+      // Buscar el producto completo en productosActuales
+      const producto = productosActuales.find(p => p.id == productoId);
+      if (producto) {
+        mostrarVentanaEditar(producto, "EMPLEADO");
+      } else {
+        console.error("❌ Producto no encontrado para editar");
+        alert("Error: No se pudo encontrar el producto para editar");
+      }
+    });
+  });
+
+  // Event listeners para eliminar
+  document.querySelectorAll('.delete-producto-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation(); // Evitar que se propague el evento
+      const productoId = e.target.getAttribute('data-id');
+      const productoNombre = e.target.getAttribute('data-nombre');
+      
+      console.log("🗑️ Empleado eliminando producto:", productoId, productoNombre);
+      
+      if (confirm(`¿Estás seguro de que quieres eliminar el producto "${productoNombre}"?`)) {
+        await eliminarProducto(productoId, "EMPLEADO");
+      }
+    });
   });
 }
 
@@ -470,19 +540,40 @@ async function cargarProductosFiltrados(filtro) {
   if (filtro === 'stock-bajo') {
     if (rol === "ADMIN") {
       try {
+        console.log("🔗 Llamando a:", productosStockBajoUrlAdmin);
         const response = await fetch(productosStockBajoUrlAdmin, {
           headers: { "Authorization": `Bearer ${userData.token}` }
         });
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        
+        console.log("📊 Response status:", response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("❌ Error en stock bajo:", errorText);
+          throw new Error(`Error HTTP: ${response.status}: ${errorText}`);
+        }
+        
         productos = await response.json();
+        console.log("✅ Productos stock bajo (≤10) cargados:", productos.length);
+        
       } catch (error) {
         console.error("Error al cargar productos filtrados:", error);
         productos = [];
       }
     } else {
+      console.log("👤 Empleado - filtrando localmente por stock ≤ 10");
       const todoProductos = await cargarProductosPorBodegas(userData);
-      productos = todoProductos.filter(p => p.stock <= 5);
+      
+      // Stock bajo ≤ 10 para coincidir con el backend
+      productos = todoProductos.filter(p => {
+        console.log(`📊 Producto: ${p.nombre}, Stock: ${p.stock}, Stock bajo: ${p.stock <= 10}`);
+        return p.stock <= 10;
+      });
+      
+      console.log("📉 Productos con stock bajo (≤10):", productos);
     }
+    
+    productosActuales = productos;
     renderProductos(productos, rol);
     return;
   }
@@ -502,20 +593,33 @@ async function cargarProductosFiltrados(filtro) {
     } else {
       productos = await cargarProductosPorBodegas(userData);
     }
+    productosActuales = productos;
     renderProductos(productos, rol);
     return;
   }
+  
   console.warn(`Filtro "${filtro}" no soportado`);
-  productosActuales = productos; 
+  productosActuales = productos;
   renderProductos([], rol);
 }
 
 function buscarProductosPorNombre(nombreBuscado) {
   const criterio = nombreBuscado.trim().toLowerCase();
+  
+  console.log("🔍 Buscando:", criterio);
+  console.log("📦 productosActuales:", productosActuales.length);
+
+  if (criterio === '') {
+    // Si está vacío, mostrar todos los productos
+    renderProductos(productosActuales, isAdmin ? "ADMIN" : "EMPLEADO");
+    return;
+  }
 
   const productosFiltrados = productosActuales.filter(prod =>
     prod.nombre.toLowerCase().includes(criterio)
   );
+
+  console.log("✅ Resultados encontrados:", productosFiltrados.length);
 
   const userData = JSON.parse(sessionStorage.getItem("userData"));
   renderProductos(productosFiltrados, userData?.rol);
