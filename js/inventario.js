@@ -2,6 +2,7 @@ import { cargarBodegas } from './bodega.js';
 
 let bodegasEmpleado = []
 let bodegasAdmin = []
+let productosActuales = [];
 
 let isAdmin;
 
@@ -28,6 +29,12 @@ export async function initProductos() {
     });
   }
 
+  const buscarInput = document.getElementById('buscar-producto');
+  if (buscarInput) {
+    buscarInput.addEventListener('input', (e) => {
+      buscarProductosPorNombre(e.target.value);
+    });
+  }
 
   renderAgregarProductoCard(isAdmin);
   renderProductos(productos, isAdmin);
@@ -499,6 +506,17 @@ async function cargarProductosFiltrados(filtro) {
     return;
   }
   console.warn(`Filtro "${filtro}" no soportado`);
+  productosActuales = productos; 
   renderProductos([], rol);
 }
 
+function buscarProductosPorNombre(nombreBuscado) {
+  const criterio = nombreBuscado.trim().toLowerCase();
+
+  const productosFiltrados = productosActuales.filter(prod =>
+    prod.nombre.toLowerCase().includes(criterio)
+  );
+
+  const userData = JSON.parse(sessionStorage.getItem("userData"));
+  renderProductos(productosFiltrados, userData?.rol);
+}
