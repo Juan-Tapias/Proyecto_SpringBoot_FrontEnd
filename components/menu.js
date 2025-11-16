@@ -14,7 +14,7 @@ export function renderSidebarMenu(targetSelector = 'body') {
       <li class="menu-item" data-target="dashboard"><i>📊</i> Dashboard</li>
       <li class="menu-item" data-target="bodegas"><i>🏭</i> Gestión de Bodegas</li>
       <li class="menu-item" data-target="productos"><i>📦</i> Inventario</li>
-      ${isAdmin ? '<li class="menu-item" data-target="usuarios"><i>👤</i> Gestión de Usuarios</li>' : ''}
+      <li class="menu-item ${userData?.rol !== 'ADMIN' ? 'hidden' : ''}" data-target="usuarios"><i>👥</i> Gestión de Usuarios</li>
     </ul>
   </div>
 
@@ -84,6 +84,16 @@ window.cerrarSesion = function() {
 };
 
 async function cargarSeccion(target) {
+
+  const userData = JSON.parse(sessionStorage.getItem("userData"));
+  const isAdmin = userData?.rol === "ADMIN";
+  
+  // Verificar permisos antes de cargar la sección
+  if (target === 'usuarios' && !isAdmin) {
+    alert('No tienes permisos para acceder a la gestión de usuarios');
+    return;
+  }
+
   const main = document.getElementById('main-content');
   const secciones = {
     mover: { 
