@@ -329,7 +329,7 @@ export async function cargarBodegas(userData) {
     const isAdmin = userData?.rol === "ADMIN";
     const url = isAdmin
       ? `http://localhost:8080/api/admin/bodegas?usuarioId=${userData.id}`
-      : `http://localhost:8080/api/empleado/bodegas?usuarioId=${userData.id}`;
+      : `http://localhost:8080/api/empleado/bodegas/encargado?usuarioId=${userData.id}`;
 
     console.log("🔍 Cargando bodegas desde:", url);
     

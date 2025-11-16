@@ -1,6 +1,8 @@
 export function renderSidebarMenu(targetSelector = 'body') {
   const userData = JSON.parse(sessionStorage.getItem("userData"));
   
+  const isAdmin = userData?.rol === 'ADMIN';
+
   const html = `
   <div class="sidebar">
     <div class="logo">
@@ -8,11 +10,11 @@ export function renderSidebarMenu(targetSelector = 'body') {
       <p>Sistema de Gestión de Bodegas</p>
     </div>
     <ul class="menu">
-      <li class="menu-item" data-target="dashboard"><i>📊</i> Dashboard</li>
       <li class="menu-item" data-target="mover"><i>📊</i> Mover</li>
+      <li class="menu-item" data-target="dashboard"><i>📊</i> Dashboard</li>
       <li class="menu-item" data-target="bodegas"><i>🏭</i> Gestión de Bodegas</li>
       <li class="menu-item" data-target="productos"><i>📦</i> Inventario</li>
-      <li class="menu-item" data-target="usuarios"><i>👤</i> Gestión de Usuarios</li>
+      ${isAdmin ? '<li class="menu-item" data-target="usuarios"><i>👤</i> Gestión de Usuarios</li>' : ''}
     </ul>
   </div>
 
@@ -46,7 +48,6 @@ export function renderSidebarMenu(targetSelector = 'body') {
   const container = document.querySelector(targetSelector);
   if (container) container.insertAdjacentHTML('afterbegin', html);
 
-  // Event listeners del sidebar
   document.querySelectorAll('.menu-item').forEach(item => {
     item.addEventListener('click', () => {
       const target = item.dataset.target;
@@ -54,7 +55,6 @@ export function renderSidebarMenu(targetSelector = 'body') {
     });
   });
 
-  // Event listener para el dropdown del usuario
   setupUserDropdown();
 }
 
@@ -68,7 +68,6 @@ function setupUserDropdown() {
       menu.classList.toggle('show');
     });
 
-    // Cerrar dropdown al hacer clic fuera
     document.addEventListener('click', () => {
       menu.classList.remove('show');
     });
@@ -77,7 +76,6 @@ function setupUserDropdown() {
 
 window.cerrarSesion = function() {
   if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-    // Limpiar sessionStorage
     sessionStorage.removeItem("userData");
     sessionStorage.removeItem("token");
     
@@ -112,11 +110,6 @@ async function cargarSeccion(target) {
       html: '/pages/usuarios.html',
       js: '/js/usuarios.js',
       title: 'Gestión de Usuarios'
-    },
-    reportes: { 
-      html: '/pages/reportes.html',
-      js: '/js/reportes.js',
-      title: 'Reportes'
     }
   };
 
@@ -126,7 +119,6 @@ async function cargarSeccion(target) {
   try {
     main.innerHTML = '<div class="loading">Cargando...</div>';
 
-    // Actualizar título en el header
     const titleElement = document.getElementById('current-section-title');
     if (titleElement) {
       titleElement.textContent = seccion.title;

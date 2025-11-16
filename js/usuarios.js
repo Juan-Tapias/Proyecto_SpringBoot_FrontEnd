@@ -1,3 +1,4 @@
+
 export function initUsuarios() {
   const userData = JSON.parse(sessionStorage.getItem("userData"));
   const isAdmin = userData?.rol === "ADMIN";
@@ -18,7 +19,6 @@ export function initUsuarios() {
   const modalOk = document.getElementById("usuario-modal-ok");
   const modalCancel = document.getElementById("usuario-modal-cancel");
 
-  // Variable global para almacenar los usuarios cargados
   let usuariosCargados = [];
 
   if (addBtn) {
@@ -129,7 +129,6 @@ export function initUsuarios() {
       container.appendChild(row);
     });
 
-    // Agregar event listeners después de crear todas las filas
     document.querySelectorAll(".edit-usuario-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         const usuarioId = e.target.getAttribute("data-id");
@@ -156,7 +155,6 @@ export function initUsuarios() {
       });
     });
 
-    // Buscador
     document.getElementById("searchUsuariosInput").oninput = function (e) {
       const query = e.target.value.toLowerCase();
       const rows = container.querySelectorAll("tr");
@@ -211,14 +209,12 @@ export function initUsuarios() {
             rol
           };
           
-          // Solo incluir password si se proporcionó uno nuevo
           if (password && password.length > 0) {
             requestBody.password = password;
           }
           
           console.log("📤 Editando usuario ID:", usuario.id, "Datos:", requestBody);
           
-          // PUT usa ID
           const url = `${usuariosBaseUrl}/${usuario.id}`;
           console.log("🔗 URL:", url);
           
@@ -240,7 +236,6 @@ export function initUsuarios() {
             return;
           }
           
-          // Intentar obtener la respuesta como JSON
           let usuarioEditado;
           try {
             usuarioEditado = await res.json();
@@ -250,7 +245,7 @@ export function initUsuarios() {
           }
           
           alert("✅ Usuario editado correctamente");
-          cargarUsuarios(); // Recargar la lista
+          cargarUsuarios();
           
         } catch (err) {
           console.error("❌ Error en edición:", err);
@@ -272,7 +267,6 @@ export function initUsuarios() {
     if (!confirm("¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.")) return;
     
     try {
-      // DELETE usa username
       const url = `${usuariosBaseUrl}/${username}`;
       console.log("🔗 URL de eliminación:", url);
       

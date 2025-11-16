@@ -1,18 +1,39 @@
+import { cargarBodegas } from './bodega.js';
+
+let bodegasEmpleado = []
+let bodegasAdmin = []
+
+let isAdmin;
+
 export async function initProductos() {
   const userData = JSON.parse(sessionStorage.getItem("userData"));
-  const rol = userData?.rol;
+  const isAdmin = userData?.rol === "ADMIN";
+
   let productos = [];
 
-  if (rol === "ADMIN") {
+  if (isAdmin) {
     productos = await cargarProductos("ADMIN");
+    bodegasAdmin = await cargarBodegas(userData);
   } else {
+    bodegasEmpleado = await cargarBodegas(userData);
     productos = await cargarProductosPorBodegas(userData);
   }
 
-  renderAgregarProductoCard(rol);
-  renderProductos(productos, rol);
-  agregarEventListeners(rol);
+  cargarProductosFiltrados('todos');
+
+  const filtroSelect = document.getElementById('filtro-productos');
+  if (filtroSelect) {
+    filtroSelect.addEventListener('change', (e) => {
+      cargarProductosFiltrados(e.target.value);
+    });
+  }
+
+
+  renderAgregarProductoCard(isAdmin);
+  renderProductos(productos, isAdmin);
+  agregarEventListeners(isAdmin);
 }
+
 
 
 export async function cargarProductos(rol) {
@@ -220,6 +241,8 @@ function mostrarVentanaAgregar(rol) {
 
   modal.classList.remove("hidden");
 
+  const listaBodegas = isAdmin ? bodegasAdmin : bodegasEmpleado;
+
   const modalContent = modal.querySelector(".modal-content");
   modalContent.innerHTML = `
     <h3>Agregar producto</h3>
@@ -228,7 +251,13 @@ function mostrarVentanaAgregar(rol) {
       <label>Categoría: <input id="agregar-categoria" type="text" required></label><br>
       <label>Precio: <input id="agregar-precio" type="number" step="0.01" required></label><br>
       <label>Stock: <input id="agregar-stock" type="number" required></label><br>
-      <label>Activo: <input id="agregar-activo" type="checkbox" checked></label><br>
+
+      <label>Bodega:</label>
+      <select id="producto-bodega" class="mover-select">
+          <option value="">-- Seleccione Bodega --</option>
+          ${listaBodegas.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('')}
+      </select>
+
       <button type="submit" class="btn-agregar">Agregar producto</button>
       <button id="cerrar-modal-agregar" type="button">Cancelar</button>
     </form>
@@ -243,15 +272,28 @@ function mostrarVentanaAgregar(rol) {
     const userData = JSON.parse(sessionStorage.getItem("userData"));
     const usuarioId = userData.id;
 
+    const bodegaSelect = document.getElementById("producto-bodega");
+    const bodegaId = parseInt(bodegaSelect.value);
+
+    if (isNaN(bodegaId)) {
+      alert("❌ Debes seleccionar una bodega válida");
+      return;
+    }
+
+    console.log(bodegaId)
+
     const nuevoProducto = {
       id: 0,
       nombre: document.getElementById("agregar-nombre").value,
       categoria: document.getElementById("agregar-categoria").value,
       stock: Number(document.getElementById("agregar-stock").value),
       precio: Number(document.getElementById("agregar-precio").value),
-      activo: document.getElementById("agregar-activo").checked,
-      usuarioId: usuarioId
+      activo: true,
+      usuarioId: usuarioId,
+      bodegaId: bodegaId
     };
+
+
 
     const endpoint = rol === "ADMIN"
       ? `http://localhost:8080/api/admin/productos?usuarioId=${usuarioId}`
@@ -409,3 +451,54 @@ function renderProductos(productos, rol) {
     cont.appendChild(card);
   });
 }
+
+const productosStockBajoUrlAdmin = 'http://localhost:8080/api/admin/productos/stock-bajo';
+
+async function cargarProductosFiltrados(filtro) {
+  const userData = JSON.parse(sessionStorage.getItem("userData"));
+  const rol = userData?.rol;
+
+  let productos = [];
+
+  if (filtro === 'stock-bajo') {
+    if (rol === "ADMIN") {
+      try {
+        const response = await fetch(productosStockBajoUrlAdmin, {
+          headers: { "Authorization": `Bearer ${userData.token}` }
+        });
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        productos = await response.json();
+      } catch (error) {
+        console.error("Error al cargar productos filtrados:", error);
+        productos = [];
+      }
+    } else {
+      const todoProductos = await cargarProductosPorBodegas(userData);
+      productos = todoProductos.filter(p => p.stock <= 5);
+    }
+    renderProductos(productos, rol);
+    return;
+  }
+
+  if (filtro === 'todos') {
+    if (rol === "ADMIN") {
+      try {
+        const response = await fetch('http://localhost:8080/api/admin/productos', {
+          headers: { "Authorization": `Bearer ${userData.token}` }
+        });
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        productos = await response.json();
+      } catch (error) {
+        console.error("Error al cargar productos filtrados:", error);
+        productos = [];
+      }
+    } else {
+      productos = await cargarProductosPorBodegas(userData);
+    }
+    renderProductos(productos, rol);
+    return;
+  }
+  console.warn(`Filtro "${filtro}" no soportado`);
+  renderProductos([], rol);
+}
+

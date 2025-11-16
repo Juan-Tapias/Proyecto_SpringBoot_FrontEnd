@@ -1,5 +1,21 @@
-<h1>Inventario</h1>
-<hr>
+<section class="productos">
+
+    <div class="productos-filtros">
+        <input 
+            type="text" 
+            id="buscar-producto" 
+            placeholder="🔍 Buscar por nombre..." 
+        />
+
+        <select id="filtro-productos">
+            <option value="todos">Todos</option>
+            <option value="stock-bajo">Stock Bajo</option>
+        </select>
+    </div>
+
+    <div id="producto-data"></div>
+</section>
+
 <section class="productos">
     <div id="producto-data"></div>
 </section>
