@@ -52,16 +52,13 @@ export function renderSidebarMenu(targetSelector = 'body') {
   const container = document.querySelector(targetSelector);
   if (container) container.insertAdjacentHTML('afterbegin', html);
 
-  // Configurar el menú hamburguesa
   setupMobileMenu();
 
-  // Configurar eventos del menú
   document.querySelectorAll('.menu-item').forEach(item => {
     item.addEventListener('click', () => {
       const target = item.dataset.target;
       cargarSeccion(target);
       
-      // Cerrar menú en móvil al seleccionar una opción
       if (window.innerWidth <= 992) {
         closeMobileMenu();
       }
@@ -71,7 +68,6 @@ export function renderSidebarMenu(targetSelector = 'body') {
   setupUserDropdown();
 }
 
-// Función para configurar el menú móvil
 function setupMobileMenu() {
   const menuToggle = document.getElementById('menuToggle');
   const sidebar = document.querySelector('.sidebar');
@@ -86,14 +82,12 @@ function setupMobileMenu() {
     
     sidebarOverlay.addEventListener('click', closeMobileMenu);
     
-    // Cerrar menú al hacer clic fuera
     document.addEventListener('click', function(e) {
       if (!sidebar.contains(e.target) && e.target !== menuToggle) {
         closeMobileMenu();
       }
     });
     
-    // Cerrar menú al redimensionar la ventana a desktop
     window.addEventListener('resize', function() {
       if (window.innerWidth > 992) {
         closeMobileMenu();
@@ -120,7 +114,6 @@ function setupUserDropdown() {
       menu.classList.toggle('show');
     });
 
-    // Cerrar dropdown al hacer clic fuera
     document.addEventListener('click', () => {
       menu.classList.remove('show');
     });
@@ -140,7 +133,6 @@ async function cargarSeccion(target) {
   const userData = JSON.parse(sessionStorage.getItem("userData"));
   const isAdmin = userData?.rol === "ADMIN";
   
-  // Verificar permisos antes de cargar la sección
   if (target === 'usuarios' && !isAdmin) {
     alert('No tienes permisos para acceder a la gestión de usuarios');
     return;
@@ -236,7 +228,6 @@ function actualizarMenuActivo(seccionActiva) {
   });
 }
 
-// Cargar dashboard por defecto al iniciar
 document.addEventListener('DOMContentLoaded', () => {
   cargarSeccion('dashboard');
 });
