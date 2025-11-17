@@ -77,49 +77,103 @@ async function cargarMovimientos(url = movimientosBaseUrl) {
     }
 
     movimientos.forEach(mov => {
-    const tr = document.createElement("tr");
-    tr.classList.add("dashboard-movimiento-row");
+      const tr = document.createElement("tr");
+      tr.classList.add("dashboard-movimiento-row");
 
-    tr.innerHTML = `
-      <td>${mov.id}</td>
-      <td>${new Date(mov.fecha).toLocaleString()}</td>
-      <td>${mov.tipoMovimiento}</td>
-      <td>${mov.usuarioNombre ?? mov.usuario ?? "-"}</td>
-      <td>${mov.comentario || '-'}</td>
-      <td>${mov.bodegaOrigenNombre || mov.bodegaOrigen || '-'}</td>
-      <td>${mov.bodegaDestinoNombre || mov.bodegaDestino || '-'}</td>
-      <td>
-        <button class="dashboard-btn-detalles">🔍 Ver detalles</button>
-        <button class="dashboard-btn-editar" data-movimiento-id="${mov.id}">✏️ Editar</button>
-        ${isAdmin ? `<button class="dashboard-btn-eliminar" data-movimiento-id="${mov.id}">🗑️ Eliminar</button>` : ""}
-      </td>
-    `;
+      tr.innerHTML = `
+        <td>${mov.id}</td>
+        <td>${new Date(mov.fecha).toLocaleString()}</td>
+        <td>${mov.tipoMovimiento}</td>
+        <td>${mov.usuarioNombre ?? mov.usuario ?? "-"}</td>
+        <td>${mov.comentario || '-'}</td>
+        <td>${mov.bodegaOrigenNombre || mov.bodegaOrigen || '-'}</td>
+        <td>${mov.bodegaDestinoNombre || mov.bodegaDestino || '-'}</td>
+        <td>
+          <button class="dashboard-btn-detalles" data-movimiento-id="${mov.id}">🔍 Ver detalles</button>
+          <button class="dashboard-btn-editar" data-movimiento-id="${mov.id}">✏️ Editar</button>
+          ${isAdmin ? `<button class="dashboard-btn-eliminar" data-movimiento-id="${mov.id}">🗑️ Eliminar</button>` : ""}
+        </td>
+      `;
 
-    const detallesRow = document.createElement("tr");
-    detallesRow.classList.add("dashboard-detalles-row");
-    detallesRow.style.display = "none";
+      // Crear fila de detalles con la información que ya tenemos
+      const detallesRow = document.createElement("tr");
+      detallesRow.classList.add("dashboard-detalles-row");
+      detallesRow.style.display = "none";
+      
+      // Generar el HTML de detalles directamente con los datos del movimiento
+      detallesRow.innerHTML = `
+        <td colspan="8">
+          <div class="dashboard-detalles-content">
+            <h4>Detalles del Movimiento #${mov.id}</h4>
+            ${generarHTMLDetalles(mov.detalles)}
+          </div>
+        </td>
+      `;
 
-    tr.querySelector(".dashboard-btn-detalles").addEventListener("click", () => {
-      detallesRow.style.display =
-        detallesRow.style.display === "none" ? "table-row" : "none";
+      // Event listener para el botón de detalles
+      const btnDetalles = tr.querySelector(".dashboard-btn-detalles");
+      btnDetalles.addEventListener("click", () => {
+        // Simplemente alternar la visibilidad - los detalles ya están cargados
+        detallesRow.style.display = detallesRow.style.display === "none" ? "table-row" : "none";
+      });
+
+      // Event listeners para editar y eliminar
+      const btnEditar = tr.querySelector(".dashboard-btn-editar");
+      btnEditar.addEventListener("click", () => editarMovimiento(mov.id));
+
+      if (isAdmin) {
+        const btnEliminar = tr.querySelector(".dashboard-btn-eliminar");
+        btnEliminar.addEventListener("click", () => eliminarMovimiento(mov.id));
+      }
+
+      tbody.appendChild(tr);
+      tbody.appendChild(detallesRow);
     });
-
-    const btnEditar = tr.querySelector(".dashboard-btn-editar");
-    btnEditar.addEventListener("click", () => editarMovimiento(mov.id));
-
-    if (isAdmin) {
-      const btnEliminar = tr.querySelector(".dashboard-btn-eliminar");
-      btnEliminar.addEventListener("click", () => eliminarMovimiento(mov.id));
-    }
-
-    tbody.appendChild(tr);
-    tbody.appendChild(detallesRow);
-  });
 
   } catch (error) {
     console.error("❌ Error al cargar movimientos:", error);
     tbody.innerHTML = "<tr><td colspan='8' style='color:red;'>Error al cargar datos.</td></tr>";
   }
+}
+
+// Función auxiliar para generar el HTML de los detalles
+function generarHTMLDetalles(detalles) {
+  if (!detalles || detalles.length === 0) {
+    return '<div class="detalles-vacio">No hay productos en este movimiento</div>';
+  }
+
+  let html = `
+    <div class="detalles-lista">
+      <table class="detalles-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  detalles.forEach(detalle => {
+    html += `
+      <tr>
+        <td>${detalle.productoNombre || 'N/A'}</td>
+        <td>${detalle.cantidad || 0}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+      <div class="detalles-resumen">
+        <strong>Total de productos: ${detalles.length}</strong>
+        <strong>Total de unidades: ${detalles.reduce((sum, det) => sum + (det.cantidad || 0), 0)}</strong>
+      </div>
+    </div>
+  `;
+
+  return html;
 }
 
 async function filtrarPorFechas() {
@@ -150,9 +204,6 @@ async function editarMovimiento(id) {
     bodegaDestinoNombre: row.children[6].textContent
   };
 
-  // ==========================
-  // CONVERSIÓN DE FECHA
-  // ==========================
   function convertirFechaTablaAFechaInput(fechaTabla) {
     try {
       const fecha = new Date(fechaTabla);
@@ -168,9 +219,6 @@ async function editarMovimiento(id) {
     const token = userData?.token;
     const isAdmin = userData?.rol === "ADMIN";
 
-    // =======================================================
-    // 🔥 RUTAS CORRECTAS PARA ADMIN / EMPLEADO
-    // =======================================================
     const bodegasUrl = isAdmin 
       ? "http://localhost:8080/api/admin/bodegas"
       : `http://localhost:8080/api/empleado/bodegas?usuarioId=${userData.id}`;
@@ -183,24 +231,17 @@ async function editarMovimiento(id) {
       ? `http://localhost:8080/api/admin/movimientos/${id}`
       : `http://localhost:8080/api/empleado/movimientos/${id}?usuarioId=${userData.id}`;
 
-    // =======================================================
-    // 📌 FETCH DE BODEGAS Y PRODUCTOS
-    // =======================================================
     const [bodegasResp, productosResp] = await Promise.all([
       fetch(bodegasUrl, { headers: { "Authorization": `Bearer ${token}` }}),
       fetch(productosUrl, { headers: { "Authorization": `Bearer ${token}` }})
     ]);
 
-    // Capar respuesta vacía
     const bodegasText = await bodegasResp.text();
     const productosText = await productosResp.text();
 
     const bodegas = bodegasText ? JSON.parse(bodegasText) : [];
     const productos = productosText ? JSON.parse(productosText) : [];
 
-    // =======================================================
-    // MODAL
-    // =======================================================
     let modal = document.getElementById("dashboard-modal-editar");
     if (!modal) {
       modal = document.createElement("div");
@@ -275,11 +316,9 @@ async function editarMovimiento(id) {
 
     modal.classList.remove("hidden");
 
-    // Cerrar modal
     document.getElementById("dashboard-cerrar-modal").onclick = () => modal.classList.add("hidden");
     document.getElementById("btn-cancelar-edicion").onclick = () => modal.classList.add("hidden");
 
-    // Agregar detalle
     document.getElementById("btn-agregar-detalle").addEventListener("click", () => {
       const container = document.getElementById("dashboard-detalles-container");
       const detalleDiv = document.createElement("div");
@@ -295,7 +334,6 @@ async function editarMovimiento(id) {
       container.appendChild(detalleDiv);
     });
 
-    // Eliminar detalle
     document.getElementById("dashboard-detalles-container").addEventListener("click", function(e) {
       if (e.target.classList.contains('btn-eliminar-detalle')) {
         const detalleItem = e.target.closest('.detalle-item');
@@ -307,7 +345,6 @@ async function editarMovimiento(id) {
       }
     });
 
-    // Submit editar
     document.getElementById("dashboard-form-editar").onsubmit = async e => {
       e.preventDefault();
 

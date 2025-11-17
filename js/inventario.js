@@ -96,7 +96,7 @@ export async function cargarProductos(rol) {
 
         prods.forEach(p => {
           p.bodega = bodega.nombre;
-          p.bodegaId = bodega.id; // 🔥 Guardar ID de bodega para empleados
+          p.bodegaId = bodega.id; 
         });
 
         productos.push(...prods);
@@ -142,7 +142,6 @@ async function eliminarProducto(productoId, rol) {
     alert("Producto eliminado correctamente");
     document.getElementById("modal-editar").classList.add("hidden");
     
-    // Recargar productos y actualizar productosActuales
     if (isAdmin) {
       productosActuales = await cargarProductos("ADMIN");
     } else {
@@ -216,7 +215,6 @@ async function guardarCambiosProducto(productoActual, datosActualizados, rol) {
       usuarioId: userData.id
     };
 
-    // 🔥 Para empleados, asegurarnos de incluir bodegaId si existe
     if (rol !== "ADMIN" && productoActual.bodegaId) {
       payload.bodegaId = productoActual.bodegaId;
     }
@@ -235,7 +233,6 @@ async function guardarCambiosProducto(productoActual, datosActualizados, rol) {
     alert("Producto actualizado");
     document.getElementById("modal-editar").classList.add("hidden");
     
-    // Recargar productos y actualizar productosActuales
     if (isAdmin) {
       productosActuales = await cargarProductos("ADMIN");
     } else {
@@ -329,7 +326,6 @@ function mostrarVentanaAgregar(rol) {
       alert("Producto agregado correctamente");
       modal.classList.add("hidden");
       
-      // Recargar productos y actualizar productosActuales
       if (isAdmin) {
         productosActuales = await cargarProductos("ADMIN");
       } else {
@@ -351,7 +347,6 @@ function renderAgregarProductoCard(rol) {
   const prev = document.getElementById("card-agregar-producto");
   if (prev) prev.remove();
 
-  // 🔥 MOSTRAR BOTÓN DE AGREGAR TANTO PARA ADMIN COMO EMPLEADOS
   const card = document.createElement("div");
   card.className = "producto-card agregar-producto-card";
   card.id = "card-agregar-producto";
@@ -408,7 +403,7 @@ export async function cargarProductosPorBodegas(userData) {
         stock: item.stock,
         precio: item.precio ?? 0,
         bodega: bodega.nombre,
-        bodegaId: bodega.id // 🔥 Guardar ID de bodega
+        bodegaId: bodega.id 
       }));
 
       productosTotales.push(...productosMapeados);
@@ -460,21 +455,12 @@ function renderProductos(productos, rol) {
       <p><b>Stock:</b> ${prod.stock} disponibles</p>
       ${rol !== "ADMIN" ? `<p><b>Bodega:</b> ${prod.bodega}</p>` : ""}
       
-      <!-- 🔥 BOTONES DE ACCIÓN PARA EMPLEADOS -->
-      ${rol !== "ADMIN" ? `
-        <div class="producto-actions">
-          <button class="edit-producto-btn" data-id="${prod.id}" data-nombre="${prod.nombre}">
-            ✏️ Editar
-          </button>
-          <button class="delete-producto-btn" data-id="${prod.id}" data-nombre="${prod.nombre}">
-            🗑️ Eliminar
-          </button>
-        </div>
-      ` : ""}
     `;
 
-    // ADMIN: click en toda la card para editar
     if (rol === "ADMIN") {
+      card.style.cursor = "pointer";
+      card.addEventListener("click", () => mostrarVentanaEditar(prod, rol));
+    } else {
       card.style.cursor = "pointer";
       card.addEventListener("click", () => mostrarVentanaEditar(prod, rol));
     }
@@ -482,7 +468,6 @@ function renderProductos(productos, rol) {
     cont.appendChild(card);
   });
 
-  // 🔥 AGREGAR EVENT LISTENERS PARA EMPLEADOS
   if (rol !== "ADMIN") {
     agregarEventListenersEmpleados();
   }
@@ -491,9 +476,7 @@ function renderProductos(productos, rol) {
   console.log("🔍 productosActuales tiene:", productosActuales.length);
 }
 
-// 🔥 NUEVA FUNCIÓN PARA EVENT LISTENERS DE EMPLEADOS
 function agregarEventListenersEmpleados() {
-  // Event listeners para editar
   document.querySelectorAll('.edit-producto-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation(); // Evitar que se propague el evento
@@ -502,7 +485,6 @@ function agregarEventListenersEmpleados() {
       
       console.log("📝 Empleado editando producto:", productoId, productoNombre);
       
-      // Buscar el producto completo en productosActuales
       const producto = productosActuales.find(p => p.id == productoId);
       if (producto) {
         mostrarVentanaEditar(producto, "EMPLEADO");
@@ -513,10 +495,9 @@ function agregarEventListenersEmpleados() {
     });
   });
 
-  // Event listeners para eliminar
   document.querySelectorAll('.delete-producto-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
-      e.stopPropagation(); // Evitar que se propague el evento
+      e.stopPropagation();
       const productoId = e.target.getAttribute('data-id');
       const productoNombre = e.target.getAttribute('data-nombre');
       
@@ -564,7 +545,6 @@ async function cargarProductosFiltrados(filtro) {
       console.log("👤 Empleado - filtrando localmente por stock ≤ 10");
       const todoProductos = await cargarProductosPorBodegas(userData);
       
-      // Stock bajo ≤ 10 para coincidir con el backend
       productos = todoProductos.filter(p => {
         console.log(`📊 Producto: ${p.nombre}, Stock: ${p.stock}, Stock bajo: ${p.stock <= 10}`);
         return p.stock <= 10;
@@ -610,7 +590,6 @@ function buscarProductosPorNombre(nombreBuscado) {
   console.log("📦 productosActuales:", productosActuales.length);
 
   if (criterio === '') {
-    // Si está vacío, mostrar todos los productos
     renderProductos(productosActuales, isAdmin ? "ADMIN" : "EMPLEADO");
     return;
   }
