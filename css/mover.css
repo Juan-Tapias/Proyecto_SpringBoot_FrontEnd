@@ -182,7 +182,7 @@
 
 /* Botones */
 .mover-btn-agregar {
-    background: #28a745;
+    background: #4e28a7;
     color: white;
     border: none;
     border-radius: 6px;
@@ -214,7 +214,7 @@
 }
 
 .mover-btn-confirmar {
-    background: #007bff;
+    background: #3470b4;
     color: white;
     border: none;
     border-radius: 8px;
