@@ -129,7 +129,7 @@ export function initUsuarios() {
         const usuarioId = e.target.getAttribute("data-id");
         const username = e.target.getAttribute("data-username");
         if (usuarioId) {
-          eliminarUsuario(usuarioId, username);
+          eliminarUsuario(username);
         } else {
           console.error("❌ ID de usuario no encontrado");
           alert("Error: No se pudo identificar el usuario a eliminar");
