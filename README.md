@@ -1,5 +1,6 @@
 # 📦 Sistema de Gestión y Auditoría de Bodegas — LogiTrack S.A.
 
+[Backend](https://github.com/Juan-Tapias/Proyecto)
 Sistema backend desarrollado con **Spring Boot** para administrar bodegas, productos, movimientos de inventario y auditorías automáticas, garantizando trazabilidad, seguridad y control centralizado.
 
 ---
