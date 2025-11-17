@@ -163,6 +163,21 @@
   overflow: hidden;
 }
 
+.btn-agregar {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
 #guardar-modal:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
@@ -173,6 +188,19 @@
 }
 
 #cerrar-modal {
+  background: linear-gradient(135deg, #95a5a6 0%, #bdc3c7 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
+}
+
+#cerrar-modal-agregar {
   background: linear-gradient(135deg, #95a5a6 0%, #bdc3c7 100%);
   color: white;
   border: none;
@@ -225,7 +253,6 @@
   padding-top: 1rem;
   border-top: 1px solid #e2e8f0;
 }
-
 
 
 /* Animación de entrada */
