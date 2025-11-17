@@ -191,56 +191,83 @@ async function filtrarPorFechas() {
 }
 
 async function editarMovimiento(id) {
-  const tbody = document.getElementById("dashboard-tbody-movimientos");
-  const row = tbody.querySelector(`.dashboard-btn-editar[data-movimiento-id="${id}"]`).closest("tr");
-
-  const mov = {
-    id,
-    fecha: row.children[1].textContent,
-    tipoMovimiento: row.children[2].textContent,
-    usuarioNombre: row.children[3].textContent,
-    comentario: row.children[4].textContent,
-    bodegaOrigenNombre: row.children[5].textContent,
-    bodegaDestinoNombre: row.children[6].textContent
-  };
-
-  function convertirFechaTablaAFechaInput(fechaTabla) {
-    try {
-      const fecha = new Date(fechaTabla);
-      return fecha.toISOString().slice(0, 16);
-    } catch {
-      return new Date().toISOString().slice(0, 16);
-    }
-  }
-
-  const fechaParaInput = convertirFechaTablaAFechaInput(mov.fecha);
-
   try {
     const token = userData?.token;
     const isAdmin = userData?.rol === "ADMIN";
 
+    const movimientoUrl = isAdmin
+      ? `http://localhost:8080/api/admin/movimientos/${id}`
+      : `http://localhost:8080/api/empleado/movimientos/${id}?usuarioId=${userData.id}`;
+
+    const movimientoResp = await fetch(movimientoUrl, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    if (!movimientoResp.ok) {
+      throw new Error(`Error al cargar movimiento: ${movimientoResp.status}`);
+    }
+
+    const movimientoActual = await movimientoResp.json();
+    console.log("📝 Movimiento actual:", movimientoActual);
+
     const bodegasUrl = isAdmin 
-      ? "http://localhost:8080/api/admin/bodegas"
+      ? `http://localhost:8080/api/admin/bodegas?usuarioId=${userData.id}`      
       : `http://localhost:8080/api/empleado/bodegas?usuarioId=${userData.id}`;
 
     const productosUrl = isAdmin
       ? "http://localhost:8080/api/admin/productos"
       : `http://localhost:8080/api/empleado/productos?usuarioId=${userData.id}`;
 
-    const updateUrl = isAdmin
-      ? `http://localhost:8080/api/admin/movimientos/${id}`
-      : `http://localhost:8080/api/empleado/movimientos/${id}?usuarioId=${userData.id}`;
-
     const [bodegasResp, productosResp] = await Promise.all([
       fetch(bodegasUrl, { headers: { "Authorization": `Bearer ${token}` }}),
       fetch(productosUrl, { headers: { "Authorization": `Bearer ${token}` }})
     ]);
 
-    const bodegasText = await bodegasResp.text();
-    const productosText = await productosResp.text();
+    let bodegas = [];
+    let productos = [];
 
-    const bodegas = bodegasText ? JSON.parse(bodegasText) : [];
-    const productos = productosText ? JSON.parse(productosText) : [];
+    if (bodegasResp.ok) {
+      const bodegasData = await bodegasResp.json();
+      console.log("🏭 Respuesta de bodegas:", bodegasData);
+      
+      if (Array.isArray(bodegasData)) {
+        bodegas = bodegasData;
+      } else if (bodegasData && Array.isArray(bodegasData.content)) {
+        bodegas = bodegasData.content;
+      } else if (bodegasData && typeof bodegasData === 'object') {
+        bodegas = [bodegasData];
+      } else {
+        console.warn("⚠️ Formato inesperado de bodegas:", bodegasData);
+        bodegas = [];
+      }
+    } else {
+      console.error("❌ Error al cargar bodegas:", bodegasResp.status);
+    }
+
+    if (productosResp.ok) {
+      const productosData = await productosResp.json();
+      console.log("📦 Respuesta de productos:", productosData);
+      
+      if (Array.isArray(productosData)) {
+        productos = productosData;
+      } else if (productosData && Array.isArray(productosData.content)) {
+        productos = productosData.content;
+      } else if (productosData && typeof productosData === 'object') {
+        productos = [productosData];
+      } else {
+        console.warn("⚠️ Formato inesperado de productos:", productosData);
+        productos = [];
+      }
+    } else {
+      console.error("❌ Error al cargar productos:", productosResp.status);
+    }
+
+    console.log(`🏭 Bodegas cargadas: ${bodegas.length}`);
+    console.log(`📦 Productos cargados: ${productos.length}`);
+
+    const updateUrl = isAdmin
+      ? `http://localhost:8080/api/admin/movimientos/${id}`
+      : `http://localhost:8080/api/empleado/movimientos/${id}?usuarioId=${userData.id}`;
 
     let modal = document.getElementById("dashboard-modal-editar");
     if (!modal) {
@@ -249,6 +276,15 @@ async function editarMovimiento(id) {
       modal.className = "dashboard-modal";
       document.body.appendChild(modal);
     }
+
+    const fechaParaInput = new Date(movimientoActual.fecha).toISOString().slice(0, 16);
+
+    const isBodegaSelected = (bodegaId, movimientoId) => {
+      if (!bodegaId) return false;
+      if (movimientoId === 'origen') return movimientoActual.bodegaOrigenId === bodegaId;
+      if (movimientoId === 'destino') return movimientoActual.bodegaDestinoId === bodegaId;
+      return false;
+    };
 
     modal.innerHTML = `
       <div class="dashboard-modal-content">
@@ -259,22 +295,26 @@ async function editarMovimiento(id) {
           <div class="form-group">
             <label for="dashboard-editar-tipo-mov">Tipo de Movimiento:</label>
             <select id="dashboard-editar-tipo-mov">
-              <option value="ENTRADA" ${mov.tipoMovimiento === "ENTRADA" ? "selected":""}>ENTRADA</option>
-              <option value="SALIDA" ${mov.tipoMovimiento === "SALIDA" ? "selected":""}>SALIDA</option>
-              <option value="TRASLADO" ${mov.tipoMovimiento === "TRASLADO" ? "selected":""}>TRASLADO</option>
+              <option value="ENTRADA" ${movimientoActual.tipoMovimiento === "ENTRADA" ? "selected":""}>ENTRADA</option>
+              <option value="SALIDA" ${movimientoActual.tipoMovimiento === "SALIDA" ? "selected":""}>SALIDA</option>
+              <option value="TRANSFERENCIA" ${movimientoActual.tipoMovimiento === "TRANSFERENCIA" ? "selected":""}>TRANSFERENCIA</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="dashboard-editar-comentario">Comentario:</label>
-            <textarea id="dashboard-editar-comentario">${mov.comentario||""}</textarea>
+            <textarea id="dashboard-editar-comentario">${movimientoActual.comentario || ""}</textarea>
           </div>
 
           <div class="form-group">
             <label for="dashboard-editar-bodega-origen">Bodega Origen:</label>
             <select id="dashboard-editar-bodega-origen">
               <option value="">-- Seleccione --</option>
-              ${bodegas.map(b => `<option value="${b.id}" ${b.nombre === mov.bodegaOrigenNombre ? "selected":""}>${b.nombre}</option>`).join("")}
+              ${bodegas.length > 0 ? bodegas.map(b => `
+                <option value="${b.id}" ${movimientoActual.bodegaOrigenId === b.id ? "selected":""}>
+                  ${b.nombre}
+                </option>
+              `).join("") : '<option value="">No hay bodegas disponibles</option>'}
             </select>
           </div>
 
@@ -282,7 +322,11 @@ async function editarMovimiento(id) {
             <label for="dashboard-editar-bodega-destino">Bodega Destino:</label>
             <select id="dashboard-editar-bodega-destino">
               <option value="">-- Seleccione --</option>
-              ${bodegas.map(b => `<option value="${b.id}" ${b.nombre === mov.bodegaDestinoNombre ? "selected":""}>${b.nombre}</option>`).join("")}
+              ${bodegas.length > 0 ? bodegas.map(b => `
+                <option value="${b.id}" ${movimientoActual.bodegaDestinoId === b.id ? "selected":""}>
+                  ${b.nombre}
+                </option>
+              `).join("") : '<option value="">No hay bodegas disponibles</option>'}
             </select>
           </div>
 
@@ -294,14 +338,32 @@ async function editarMovimiento(id) {
           <div class="form-group">
             <label>Detalles del Movimiento:</label>
             <div id="dashboard-detalles-container">
-              <div class="detalle-item">
-                <select class="detalle-producto" required>
-                  <option value="">-- Seleccione Producto --</option>
-                  ${productos.map(p => `<option value="${p.id}">${p.nombre}</option>`).join("")}
-                </select>
-                <input class="detalle-cantidad" type="number" min="1" value="1" required />
-                <button type="button" class="btn-eliminar-detalle">🗑️</button>
-              </div>
+              ${movimientoActual.detalles && movimientoActual.detalles.length > 0 ? 
+                movimientoActual.detalles.map((detalle, index) => `
+                  <div class="detalle-item">
+                    <select class="detalle-producto" required>
+                      <option value="">-- Seleccione Producto --</option>
+                      ${productos.length > 0 ? productos.map(p => `
+                        <option value="${p.id}" ${detalle.productoId === p.id ? "selected":""}>
+                          ${p.nombre}
+                        </option>
+                      `).join("") : '<option value="">No hay productos disponibles</option>'}
+                    </select>
+                    <input class="detalle-cantidad" type="number" min="1" value="${detalle.cantidad}" required />
+                    <button type="button" class="btn-eliminar-detalle">🗑️</button>
+                  </div>
+                `).join("") : 
+                `<div class="detalle-item">
+                  <select class="detalle-producto" required>
+                    <option value="">-- Seleccione Producto --</option>
+                    ${productos.length > 0 ? productos.map(p => `
+                      <option value="${p.id}">${p.nombre}</option>
+                    `).join("") : '<option value="">No hay productos disponibles</option>'}
+                  </select>
+                  <input class="detalle-cantidad" type="number" min="1" value="1" required />
+                  <button type="button" class="btn-eliminar-detalle">🗑️</button>
+                </div>`
+              }
             </div>
             <button type="button" id="btn-agregar-detalle" class="btn-secondary">➕ Agregar Producto</button>
           </div>
@@ -326,7 +388,7 @@ async function editarMovimiento(id) {
       detalleDiv.innerHTML = `
         <select class="detalle-producto" required>
           <option value="">-- Seleccione Producto --</option>
-          ${productos.map(p => `<option value="${p.id}">${p.nombre}</option>`).join("")}
+          ${productos.length > 0 ? productos.map(p => `<option value="${p.id}">${p.nombre}</option>`).join("") : '<option value="">No hay productos disponibles</option>'}
         </select>
         <input class="detalle-cantidad" type="number" min="1" value="1" required />
         <button type="button" class="btn-eliminar-detalle">🗑️</button>
@@ -350,8 +412,10 @@ async function editarMovimiento(id) {
 
       const tipoMovimiento = document.getElementById("dashboard-editar-tipo-mov").value;
       const comentario = document.getElementById("dashboard-editar-comentario").value;
-      const bodegaOrigenId = parseInt(document.getElementById("dashboard-editar-bodega-origen").value || 0);
-      const bodegaDestinoId = parseInt(document.getElementById("dashboard-editar-bodega-destino").value || 0);
+      const bodegaOrigenId = document.getElementById("dashboard-editar-bodega-origen").value ? 
+        parseInt(document.getElementById("dashboard-editar-bodega-origen").value) : null;
+      const bodegaDestinoId = document.getElementById("dashboard-editar-bodega-destino").value ? 
+        parseInt(document.getElementById("dashboard-editar-bodega-destino").value) : null;
       const fechaInput = document.getElementById("dashboard-editar-fecha").value;
 
       if (!fechaInput) {
@@ -389,8 +453,8 @@ async function editarMovimiento(id) {
         return;
       }
 
-      if (tipoMovimiento === "TRASLADO" && (!bodegaOrigenId || !bodegaDestinoId)) {
-        alert("Para traslados, debe especificar tanto bodega origen como destino");
+      if (tipoMovimiento === "TRANSFERENCIA" && (!bodegaOrigenId || !bodegaDestinoId)) {
+        alert("Para transferencias, debe especificar tanto bodega origen como destino");
         return;
       }
 
@@ -403,6 +467,8 @@ async function editarMovimiento(id) {
         detalles: detalles
       };
 
+      console.log("📤 Enviando payload:", payload);
+
       try {
         const resp = await fetch(updateUrl, {
           method: "PUT",
@@ -414,11 +480,15 @@ async function editarMovimiento(id) {
         });
 
         if (!resp.ok) {
-          const txt = await resp.text();
-          throw new Error(txt);
+          const errorText = await resp.text();
+          console.error("❌ Error del servidor:", errorText);
+          throw new Error(errorText);
         }
 
-        alert("Movimiento actualizado");
+        const resultado = await resp.json();
+        console.log("✅ Movimiento actualizado:", resultado);
+
+        alert("Movimiento actualizado correctamente");
         modal.classList.add("hidden");
         cargarMovimientos();
       } catch (error) {
@@ -429,7 +499,7 @@ async function editarMovimiento(id) {
 
   } catch (err) {
     console.error("❌ Error al cargar datos para editar:", err);
-    alert("Error cargando movimiento");
+    alert("Error cargando movimiento: " + err.message);
   }
 }
 
